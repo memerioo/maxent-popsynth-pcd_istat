@@ -1,0 +1,23 @@
+# Auto-generated K=20 marginals
+marginals = {
+    "sex": {"F": 0.52000, "M": 0.48000},
+    "age": {"0-4": 0.03000, "5-14": 0.08000, "15-24": 0.08000, "25-34": 0.13000, "35-49": 0.21000, "50-64": 0.22000, "65-74": 0.11000, "75+": 0.14000},
+    "marital": {"NeverMarried": 0.51000, "Married": 0.38000, "Divorced": 0.04000, "Widowed": 0.07000},
+    "education": {"SecondaryAndLess": 0.49605, "UpperSecondary": 0.34895, "Tertiary": 0.15500},
+    "ResidenceQ": {"CommuteInward": 0.27000, "Reno": 0.11000, "Navile": 0.13000, "Saragozza": 0.13000, "SanDonato": 0.15000, "SantoStefano": 0.10000, "Savena": 0.11000},
+    "StudentStat": {"NotStudent": 0.67000, "SchoolStudent": 0.11000, "UniStudent": 0.22000},
+    "employment": {"FullTime": 0.38176, "PartTime": 0.07824, "Unemployed": 0.02310, "NotInLF": 0.51690},
+    "employ_stat": {"NotWorker": 0.54000, "SelfEmployed": 0.10000, "Employee": 0.36000},
+    "Wage": {"NotWorker": 0.54000, "Low": 0.10203, "Medium": 0.17924, "High": 0.13374, "VeryHigh": 0.04500},
+    "employ_commute": {"NotWorker": 0.54000, "InsideBO": 0.22000, "Outward": 0.08000, "Inward": 0.16000},
+    "Student_commute": {"NotStudent": 0.67000, "InsideBO": 0.17000, "Outward": 0.05000, "Inward": 0.11000},
+    "Occupation": {"NotWorker": 0.54000, "Manager": 0.16000, "WhiteC": 0.14000, "BlueC": 0.12000, "Elementary": 0.04000},
+    "MainTranspStudnt": {"NotStudent": 0.67000, "Foot": 0.02720, "Bike": 0.04240, "PublicTrns": 0.13990, "CarDriver": 0.08150, "CarPassanger": 0.02750, "MotorCycle": 0.01150},
+    "MainTranspWorker": {"NotWorker": 0.54000, "Foot": 0.03429, "Bike": 0.01633, "PublicTrns": 0.09467, "CarDriver": 0.22848, "CarPassanger": 0.06641, "MotorCycle": 0.01982},
+    "TranspTime_Stud": {"NotStudent": 0.67000, "15m-": 0.08630, "15-30m": 0.11675, "30m+": 0.12695},
+    "TranspTime_Worker": {"NotWorker": 0.54000, "15m-": 0.15663, "15-30m": 0.15340, "30m+": 0.14998},
+    "LunchPlace": {"Home": 0.76668, "Canteen": 0.05987, "Restaurant": 0.03384, "Cafe": 0.01715, "AtS/WPlace": 0.12247},
+    "SundayOut": {"Under3yo": 0.02000, "ExitHouse": 0.76280, "StayIn": 0.21720},
+    "SaturdayOut": {"Under3yo": 0.02000, "ExitHouse": 0.84880, "StayIn": 0.13120},
+    "WeekDayOut": {"Under3yo": 0.02000, "ExitHouse": 0.86840, "StayIn": 0.11160},
+}
