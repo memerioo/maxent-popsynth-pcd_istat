@@ -37,6 +37,8 @@ def implied_vs_stated(cpts, marg, top_n=15):
     from collections import defaultdict
     by_child = defaultdict(list)
     for c in cpts:
+        if c['name'].startswith('h_'):
+            continue
         by_child[c['child']].append(c)
 
     rows = []

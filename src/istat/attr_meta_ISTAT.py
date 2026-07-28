@@ -23,8 +23,8 @@ _ATTR_DEFS = [
     ("employment",        ["FullTime", "PartTime", "Unemployed", "NotInLF"]),
     ("employ_stat",       ["NotWorker", "SelfEmployed", "Employee"]),
     ("Wage",              ["NotWorker", "Low", "Medium", "High", "VeryHigh"]),
-    ("employ_commute",    ["NotWorker", "InsideBO", "Outward", "Inward"]), #2023 BO
-    ("Student_commute",   ["NotStudent", "InsideBO", "Outward", "Inward"]), #2011 BO
+    ("employ_commute",    ["NotWorker", "InsideBO", "Outward", "Inward"]), 
+    ("Student_commute",   ["NotStudent", "InsideBO", "Outward", "Inward"]), 
     ("Profession",        ["NotWorker", "AgricFishForest", "Industry", "Services"]),
     ("Occupation",        ["NotWorker", "Manager", "WhiteC", "BlueC", "Elementary"]),
     ("BMI",               ["UnderAge", "UnderWeight", "NormalWeight", "OverWeight", "Obese"]),
@@ -34,8 +34,8 @@ _ATTR_DEFS = [
     ("Smoking",           ["Never", "Former", "1-5", "6-10", "11-20", "20+"]),
     ("MainTranspStudnt",  ["NotStudent", "Foot", "Bike", "PublicTrns", "CarDriver", "CarPassanger", "MotorCycle"]),
     ("MainTranspWorker",  ["NotWorker", "Foot", "Bike", "PublicTrns", "CarDriver", "CarPassanger", "MotorCycle"]),
-    ("TranspTime_Stud",   ["NotStudent", "15m-", "15-30m", "30m+"]), #2023 EmiliaR version
-    ("TranspTime_Worker", ["NotWorker", "15m-", "15-30m", "30m+"]), #2023 EmiliaR version
+    ("TranspTime_Stud",   ["NotStudent", "15m-", "15-30m", "30m+"]), 
+    ("TranspTime_Worker", ["NotWorker", "15m-", "15-30m", "30m+"]), 
     ("LunchPlace",        ["Home", "Canteen", "Restaurant", "Cafe", "AtS/WPlace"]),
     ("SundayOut",         ["Under3yo", "ExitHouse", "StayIn"]),
     ("SaturdayOut",       ["Under3yo", "ExitHouse", "StayIn"]),
@@ -49,6 +49,7 @@ _ATTR_DEFS = [
     ("LifeSatisfaction",  ["Under14yo", "0-3", "4-6", "7-10"]),
     
 ]
+
 ### HH, residing area,,
 
 ATTR_NAMES_SYNTH   = [name for name, _ in _ATTR_DEFS]
@@ -92,8 +93,8 @@ marginals = {
     "Occupation":     {"NotWorker": 0.54, "Manager": 0.16, "WhiteC": 0.14, "BlueC": 0.12, "Elementary": 0.04}, #NorthEast
     "AlcoholCons":    {"Never": 0.59, "Exceptionally": 0.20, "Consumer": 0.21}, #EmiliaR
     "Smoking":        {"Never": 0.57, "Former": 0.24, "1-5": 0.05, "6-10": 0.07, "11-20": 0.06, "20+": 0.01}, #EmiliaR
-    "MainTranspStudnt": {"NotStudent": 0.67, "Foot": 0.03, "Bike": 0.04, "PublicTrns": 0.14, "CarDriver": 0.08, "CarPassanger": 0.03, "MotorCycle": 0.01}, #BO2011 + EmiliaR 2023
-    "MainTranspWorker": {"NotWorker": 0.54, "Foot": 0.02, "Bike": 0.02, "PublicTrns": 0.16, "CarDriver": 0.13, "CarPassanger": 0.10, "MotorCycle": 0.03}, #BO2011 + Emilia2023
+    "MainTranspStudnt": {"NotStudent": 0.67, "Foot": 0.03, "Bike": 0.04, "PublicTrns": 0.14, "CarDriver": 0.08, "CarPassanger": 0.03, "MotorCycle": 0.01}, #EmiliaR 2023
+    "MainTranspWorker": {"NotWorker": 0.54, "Foot": 0.02, "Bike": 0.02, "PublicTrns": 0.16, "CarDriver": 0.13, "CarPassanger": 0.10, "MotorCycle": 0.03}, #Emilia 2023
     "TranspTime_Stud" :{"NotStudent": 0.67, "15m-": 0.19, "15-30m": 0.10, "30m+": 0.04}, #EmiliaR 2023
     "TranspTime_Worker" :{"NotWorker": 0.54, "15m-": 0.19, "15-30m": 0.21, "30m+": 0.06}, #EmiliaR 2023
     "LunchPlace":     {"Home": 0.73, "Canteen": 0.11, "Restaurant": 0.02, "Cafe": 0.02, "AtS/WPlace": 0.12}, #EmiliaR 2023
@@ -119,7 +120,7 @@ marginals = {
 
 
 ####Conditions: 
-# B1: P(sex | age)
+# B1: P(sex | age) #BO
 age_sex = {
     "0-4":   {"F": 0.55, "M": 0.45},
     "5-14":  {"F": 0.49, "M": 0.51},
@@ -131,7 +132,7 @@ age_sex = {
     "75+":   {"F": 0.61, "M": 0.39},
 }
 
-# B2: P(sex | marital)
+# B2: P(sex | marital) #BO
 marital_sex = {
     "NeverMarried":  {"F": 0.49, "M": 0.51},
     "Married": {"F": 0.51, "M": 0.49},
@@ -139,7 +140,7 @@ marital_sex = {
     "Widowed":   {"F": 0.81, "M": 0.19},
 }
 
-# B3: P(marital | age)
+# B3: P(marital | age) #BO
 age_marital = {
     "0-4":   {"NeverMarried": 1.00, "Married": 0.00, "Divorced": 0.00, "Widowed": 0.00},
     "5-14":  {"NeverMarried": 1.00, "Married": 0.00, "Divorced": 0.00, "Widowed": 0.00},
@@ -151,7 +152,7 @@ age_marital = {
     "75+":   {"NeverMarried": 0.07, "Married": 0.49, "Divorced": 0.05, "Widowed": 0.39},
 }
 
-# B4: P(Sex | Citizenship)
+# B4: P(Sex | Citizenship) #PBO
 citizenship_sex = {
     "Italian":   {"F": 0.52, "M": 0.48},
     "Foreigner": {"F": 0.53, "M": 0.47},
@@ -164,7 +165,7 @@ sex_education = {
     "M":   {"SecondaryAndLess": 0.51, "UpperSecondary": 0.35, "Tertiary": 0.14},
 }
 
-# B6: P(Education | Age)
+# B6: P(Education | Age) #NorthEast
 age_education = {
     "0-4":   {"SecondaryAndLess": 1.00, "UpperSecondary": 0.00, "Tertiary": 0.00},
     "5-14":  {"SecondaryAndLess": 1.00, "UpperSecondary": 0.00, "Tertiary": 0.00},
@@ -176,13 +177,13 @@ age_education = {
     "75+":   {"SecondaryAndLess": 0.73, "UpperSecondary": 0.20, "Tertiary": 0.07},
 }
 
-# B7: P(Education | citizenship)
+# B7: P(Education | citizenship) #NorthEast
 citizenship_education = {
     "Italian":   {"SecondaryAndLess": 0.51, "UpperSecondary": 0.35, "Tertiary": 0.14},
     "Foreigner": {"SecondaryAndLess": 0.57, "UpperSecondary": 0.33, "Tertiary": 0.10},
 }
 
-# B8: P(Sex | ResidenceQ)
+# B8: P(Sex | ResidenceQ) #BO
 Residence_Sex = {
     "CommuteInward":   {"F": 0.48, "M": 0.52},
     "Reno": {"F": 0.52, "M": 0.48},
@@ -194,7 +195,7 @@ Residence_Sex = {
 }
 
 
-# B9: P(Sex | Employment) EmiliaR Labour Force and EmiliaR PartTimeFullTime
+# B9: P(Sex | Employment) #EmiliaR Labour Force and EmiliaR PartTimeFullTime
 employment_sex = {
     "FullTime":   {"F": 0.38, "M": 0.62},
     "PartTime": {"F": 0.78, "M": 0.22},
@@ -203,18 +204,18 @@ employment_sex = {
 }
 
 
-# B10: P(Sex | StudentStat)
+# B10: P(Sex | StudentStat) #BO
 studentStat_sex = {
     "UniStudent":   {"F": 0.57, "M": 0.43},
 }
 
-# B11: P(Age | StudentStat)
+# B11: P(Age | StudentStat) #BO
 studentStat_age = {
     "UniStudent":    {"0-4": 0.00, "5-14": 0.00, "15-24": 0.61, "25-34": 0.29, "35-49": 0.10, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
  
-# B12: P(Sex | employ_stat)
+# B12: P(Sex | employ_stat) #NorthEast
 employstat_sex = {
     "SelfEmployed":    {"F": 0.14, "M": 0.86},
     "Employee":        {"F": 0.25, "M": 0.75},
@@ -222,7 +223,7 @@ employstat_sex = {
 }
 
 
-#B13: P(Citizenship | employment)
+#B13: P(Citizenship | employment) #NorthEast
 employment_citizenship = {
     "FullTime":      {"Italian": 0.88, "Foreigner": 0.12},
     "PartTime":      {"Italian": 0.88, "Foreigner": 0.12},
@@ -230,7 +231,7 @@ employment_citizenship = {
 }
 
 
-#B14: P(Sex | Profession)
+#B14: P(Sex | Profession) #IT
 profession_sex = {
     "AgricFishForest":    {"F": 0.25, "M": 0.75},
     "Industry":        {"F": 0.26, "M": 0.74},
@@ -239,7 +240,7 @@ profession_sex = {
 }
 
 
-#B15: P(employment | Profession)
+#B15: P(employment | Profession) #IT
 profession_employment = {
     "AgricFishForest":    {"FullTime": 0.85, "PartTime": 0.15},
     "Industry":        {"FullTime": 0.92, "PartTime": 0.08},
@@ -247,7 +248,7 @@ profession_employment = {
     # Absent
 }
 
-#B16: P(employstat | Profession)
+#B16: P(employstat | Profession) #IT
 profession_employstat = {
     "AgricFishForest":    {"SelfEmployed": 0.58, "Employee": 0.42},
     "Industry":        {"SelfEmployed": 0.14, "Employee": 0.86},
@@ -255,14 +256,14 @@ profession_employstat = {
     # Absent
 }
 
-#B17: P(citizenship | employstat)
+#B17: P(citizenship | employstat) #NorthEast
 employstat_citizenship = {
     "SelfEmployed":    {"Italian": 0.93, "Foreigner": 0.07},
     "Employee":        {"Italian": 0.87, "Foreigner": 0.13},
     # Absent
 }
 
-#B18 P(Citizenship | profession)
+#B18 P(Citizenship | profession) #NorthEast
 profession_citizenship = {
     "AgricFishForest": {"Italian": 0.85, "Foreigner": 0.15},
     "Industry":        {"Italian": 0.87, "Foreigner": 0.13},
@@ -270,7 +271,7 @@ profession_citizenship = {
 }
 
 
-#B19 P(Sex | Occupation)
+#B19 P(Sex | Occupation) #NorthEast
 occupation_sex = {
     "Manager":      {"F": 0.45, "M": 0.55},
     "WhiteC":       {"F": 0.67, "M": 0.33},
@@ -278,7 +279,7 @@ occupation_sex = {
     "Elementary":   {"F": 0.48, "M": 0.52},
 }
 
-#B20 P(Citizenship | Occupation)
+#B20 P(Citizenship | Occupation) #NorthEast
 occupation_citizenship = {
     "Manager":      {"Italian": 0.97, "Foreigner": 0.03},
     "WhiteC":       {"Italian": 0.88, "Foreigner": 0.12},
@@ -286,19 +287,19 @@ occupation_citizenship = {
     "Elementary":   {"Italian": 0.67, "Foreigner": 0.33},
 }
 
-#B21 P(BMI | Sex)
+#B21 P(BMI | Sex) #IT
 sex_BMI = {
-    "M":      {"UnderWeight": 0.01, "NormalWeight": 0.44, "OverWeight": 0.42, "Obese": 0.13},
-    "F":      {"UnderWeight": 0.06, "NormalWeight": 0.56, "OverWeight": 0.27, "Obese": 0.11},
+    "M":      {"UnderAge": 0.09, "UnderWeight": 0.01, "NormalWeight": 0.40, "OverWeight": 0.38, "Obese": 0.12},
+    "F":      {"UnderAge": 0.13, "UnderWeight": 0.05, "NormalWeight": 0.49, "OverWeight": 0.23, "Obese": 0.10},
 }
 
-#B22 P(Health | sex)
+#B22 P(Health | sex) #IT
 sex_health = {
     "M":      {"Healthy": 0.54, "ChronicGoodHealth": 0.19, "ChronicBadHealth": 0.27},
     "F":      {"Healthy": 0.49, "ChronicGoodHealth": 0.16, "ChronicBadHealth": 0.35},
 }
 
-#B23 P(Health | Age)
+#B23 P(Health | Age) #IT
 age_health = {
     "5-14":  {"Healthy": 0.89, "ChronicGoodHealth": 0.06, "ChronicBadHealth": 0.05},
     "15-24": {"Healthy": 0.76, "ChronicGoodHealth": 0.13, "ChronicBadHealth": 0.11},
@@ -309,19 +310,19 @@ age_health = {
     "75+":   {"Healthy": 0.09, "ChronicGoodHealth": 0.20, "ChronicBadHealth": 0.71},
 }
 
-#B24 P(Health | Occupation)
+#B24 P(Health | Occupation) #IT
 occupation_health = {
     "Manager":      {"Healthy": 0.57, "ChronicGoodHealth": 0.21, "ChronicBadHealth": 0.22},
     "WhiteC":       {"Healthy": 0.57, "ChronicGoodHealth": 0.19, "ChronicBadHealth": 0.24},
 }
 
-#B25 P(Medication | Sex)
+#B25 P(Medication | Sex) #IT
 sex_medication = {
     "F":       {"NotOnMed": 0.54, "OnMed": 0.46},
     "M":       {"NotOnMed": 0.61, "OnMed": 0.39},
 }
 
-#B26 P(Medication | Age)
+#B26 P(Medication | Age) #IT
 age_medication = {
     "15-24": {"NotOnMed": 0.81, "OnMed": 0.19},
     "25-34": {"NotOnMed": 0.78, "OnMed": 0.22},
@@ -331,58 +332,58 @@ age_medication = {
     "75+":   {"NotOnMed": 0.12, "OnMed": 0.88},
 }
 
-#B27 P(Sex | Alcohol)
+#B27 P(Sex | Alcohol) #IT
 alcohol_sex = {
     "F":      {"Never": 0.69, "Exceptionally": 0.17, "Consumer": 0.14},
     "M":      {"Never": 0.55, "Exceptionally": 0.22, "Consumer": 0.23},
 }
 
-#B28 P(Sex | Smoking)
+#B28 P(Sex | Smoking) #IT
 smoking_sex = {
     "F":      {"Never": 0.68, "Former": 0.17, "1-5": 0.05, "6-10": 0.06, "11-20": 0.04, "20+": 0.00},
     "M":      {"Never": 0.52, "Former": 0.27, "1-5": 0.05, "6-10": 0.07, "11-20": 0.08, "20+": 0.01},
 }
 
-#B29 P(WorkMeanTransp | Sex)
+#B29 P(WorkMeanTransp | Sex) #IT
 sex_MainTranspWorker = {
     "F":      {"NotWorker": 0.60, "Foot": 0.06, "Bike": 0.01, "PublicTrns": 0.03, "CarDriver": 0.27, "CarPassanger": 0.02, "MotorCycle": 0.01},
     "M":      {"NotWorker": 0.48, "Foot": 0.05, "Bike": 0.02, "PublicTrns": 0.03, "CarDriver": 0.38, "CarPassanger": 0.02, "MotorCycle": 0.02},
 }
 
-#B30 P(TimeToWork | Sex)
+#B30 P(TimeToWork | Sex) #IT
 sex_TranspTimeWork = {
     "F":      {"NotWorker": 0.60, "15m-": 0.16, "15-30m": 0.18, "30m+": 0.06},
     "M":      {"NotWorker": 0.48, "15m-": 0.18, "15-30m": 0.26, "30m+": 0.08},
 }
 
 
-#B31 P(LunchPlace | Sex)
+#B31 P(LunchPlace | Sex) #IT
 sex_LunchPlace = {
     "F":      {"Home": 0.83, "Canteen": 0.06, "Restaurant": 0.01, "Cafe": 0.01, "AtS/WPlace": 0.09},
     "M":      {"Home": 0.72, "Canteen": 0.08, "Restaurant": 0.05, "Cafe": 0.02, "AtS/WPlace": 0.13},
 }
 
-#B32 P(LunchPlace | Age)
+#B32 P(LunchPlace | Age) #IT
 age_LunchPlace = {
     "0-4":   {"Home": 1.00, "Canteen": 0.00, "Restaurant": 0.00, "Cafe": 0.00, "AtS/WPlace": 0.00},
     "50-64": {"Home": 0.70, "Canteen": 0.06, "Restaurant": 0.04, "Cafe": 0.03, "AtS/WPlace": 0.17},
     "75+":   {"Home": 0.98, "Canteen": 0.00, "Restaurant": 0.01, "Cafe": 0.01, "AtS/WPlace": 0.00},
 }
 
-#B33 P(LunchPlace | Education)
+#B33 P(LunchPlace | Education) #IT
 education_LunchPlace = {
     "UpperSecondary":   {"Home": 0.73, "Canteen": 0.07, "Restaurant": 0.04, "Cafe": 0.01, "AtS/WPlace": 0.15},
     "Tertiary":         {"Home": 0.63, "Canteen": 0.09, "Restaurant": 0.06, "Cafe": 0.03, "AtS/WPlace": 0.19},
 }
 
-#B34 P(Wage | Sex)
+#B34 P(Wage | Sex) #PBO
 sex_wage = {
     "F":     {"NotWorker": 0.60, "Low": 0.09, "Medium": 0.16, "High": 0.14, "VeryHigh": 0.01},
     "M":     {"NotWorker": 0.48, "Low": 0.10, "Medium": 0.19, "High": 0.14, "VeryHigh": 0.09},
 }
 
 
-#B35 P(Employment | age)
+#B35 P(Employment | age) #NorthEast
 age_employment = {
     "0-4":   {"FullTime": 0.00, "PartTime": 0.00, "Unemployed": 0.00, "NotInLF": 1.00},
     "5-14":  {"FullTime": 0.00, "PartTime": 0.00, "Unemployed": 0.00, "NotInLF": 1.00},
@@ -395,7 +396,7 @@ age_employment = {
 }
 
 
-#B36 P(wage | Age)
+#B36 P(wage | Age) #PBO
 age_wage = {
     "0-4":   {"NotWorker": 1.00, "Low": 0.00, "Medium": 0.00, "High": 0.00, "VeryHigh": 0.00},
     "5-14":  {"NotWorker": 1.00, "Low": 0.00, "Medium": 0.00, "High": 0.00, "VeryHigh": 0.00},
@@ -405,87 +406,87 @@ age_wage = {
     "75+":   {"NotWorker": 1.00, "Low": 0.00, "Medium": 0.00, "High": 0.00, "VeryHigh": 0.00},
 }
 
-#B37 P(wage | citizenship)
+#B37 P(wage | citizenship) #PBO
 citizenship_wage = {
     "Italian":    {"NotWorker": 0.55, "Low": 0.06, "Medium": 0.18, "High": 0.12, "VeryHigh": 0.09},
     "Foreigner":  {"NotWorker": 0.50, "Low": 0.17, "Medium": 0.22, "High": 0.11, "VeryHigh": 0.00},
 }
 
-#B38 P(Wage | Occupation)
+#B38 P(Wage | Occupation) #PBO
 occupation_wage = {
     "NotWorker":   {"NotWorker": 1.00, "Low": 0.00, "Medium": 0.00, "High": 0.00, "VeryHigh": 0.00},
     "BlueC":       {"NotWorker": 0.00, "Low": 0.27, "Medium": 0.44, "High": 0.29, "VeryHigh": 0.00},
     "Elementary":  {"NotWorker": 0.00, "Low": 0.51, "Medium": 0.45, "High": 0.04, "VeryHigh": 0.00},
 }
 
-#B39 P(Wage | Education)
+#B39 P(Wage | Education) #PBO
 education_wage = {
     "SecondaryAndLess":   {"NotWorker": 0.61, "Low": 0.10, "Medium": 0.16, "High": 0.13, "VeryHigh": 0.00},
     "UpperSecondary":     {"NotWorker": 0.34, "Low": 0.10, "Medium": 0.26, "High": 0.21, "VeryHigh": 0.09},
     "Tertiary":           {"NotWorker": 0.23, "Low": 0.07, "Medium": 0.26, "High": 0.19, "VeryHigh": 0.25},
 }
 
-#B40 P(Sex | SundayOut)
+#B40 P(Sex | SundayOut) #IT
 SundayOut_Sex = {
     "F":      {"Under3yo": 0.02, "ExitHouse": 0.71, "StayIn": 0.27},
     "M":      {"Under3yo": 0.02, "ExitHouse": 0.82, "StayIn": 0.16},
 }
 
-#B41 P(Sex | SaturdayOut)
+#B41 P(Sex | SaturdayOut) #IT
 SaturdayOut_Sex = {
     "F":      {"Under3yo": 0.02, "ExitHouse": 0.82, "StayIn": 0.16},
     "M":      {"Under3yo": 0.02, "ExitHouse": 0.88, "StayIn": 0.10},
 }
 
-#B42 P(Sex | WeekDayOut)
+#B42 P(Sex | WeekDayOut) #IT
 WeekDayOut_Sex = {
     "F":      {"Under3yo": 0.02, "ExitHouse": 0.83, "StayIn": 0.15},
     "M":      {"Under3yo": 0.02, "ExitHouse": 0.91, "StayIn": 0.07},
 }
 
-#B43 P(Sex | SunSocialEnterT)
+#B43 P(Sex | SunSocialEnterT) #IT
 SunSocialEnterT_Sex = {
     "F":      {"Under3yo": 0.02, "Y": 0.56, "N": 0.42},
     "M":      {"Under3yo": 0.02, "Y": 0.59, "N": 0.39},
 }
 
-#B44 P(Sex | SatSocialEnterT)
+#B44 P(Sex | SatSocialEnterT) #IT
 SatSocialEnterT_Sex = {
     "F":      {"Under3yo": 0.02, "Y": 0.56, "N": 0.42},
     "M":      {"Under3yo": 0.02, "Y": 0.60, "N": 0.38},
 }
 
-#B45 P(Sex | WeekDSocialEnterT)
+#B45 P(Sex | WeekDSocialEnterT) #IT
 WeekDSocialEnterT_Sex = {
     "F":      {"Under3yo": 0.02, "Y": 0.54, "N": 0.44},
     "M":      {"Under3yo": 0.02, "Y": 0.50, "N": 0.48},
 }
 
-#B46 P(Sex | SunSportOutD)
+#B46 P(Sex | SunSportOutD) #IT
 SunSportOutD_Sex = {
     "F":      {"Under3yo": 0.02, "Y": 0.38, "N": 0.60},
     "M":      {"Under3yo": 0.02, "Y": 0.47, "N": 0.51},
 }
 
-#B47 P(Sex | SatSportOutD)
+#B47 P(Sex | SatSportOutD) #IT
 SatSportOutD_Sex = {
     "F":      {"Under3yo": 0.02, "Y": 0.31, "N": 0.67},
     "M":      {"Under3yo": 0.02, "Y": 0.40, "N": 0.58},
 }
 
-#B48 P(Sex | WeekDSportOutD)
+#B48 P(Sex | WeekDSportOutD) #IT
 WeekDSportOutD_Sex = {
     "F":      {"Under3yo": 0.02, "Y": 0.26, "N": 0.72},
     "M":      {"Under3yo": 0.02, "Y": 0.32, "N": 0.66},
 }
 
-#B49 P(LifeSatisfaction | Sex)
+#B49 P(LifeSatisfaction | Sex) #IT
 Sex_LifeSatisfaction = {
     "F":      {"Under14yo": 0.11, "0-3": 0.03, "4-6": 0.22, "7-10": 0.64},
     "M":      {"Under14yo": 0.12, "0-3": 0.02, "4-6": 0.20, "7-10": 0.66},
 }
 
-#B50 P(LifeSatisfaction | Age)
+#B50 P(LifeSatisfaction | Age) #IT
 Age_LifeSatisfaction = {
     "0-4":   {"Under14yo": 1.00, "0-3": 0.00, "4-6": 0.00, "7-10": 0.00},
     "5-14":  {"Under14yo": 1.00, "0-3": 0.00, "4-6": 0.00, "7-10": 0.00},
@@ -495,25 +496,25 @@ Age_LifeSatisfaction = {
     "75+":   {"Under14yo": 0.00, "0-3": 0.05, "4-6": 0.30, "7-10": 0.65},
 }
 
-#B51 P (LifeSatisfaction | Occupation)
+#B51 P (LifeSatisfaction | Occupation) IT
 Occupation_LifeSatisfaction = {
     "Manager":     {"Under14yo": 0.00, "0-3": 0.01, "4-6": 0.16, "7-10": 0.83},
     "WhiteC":      {"Under14yo": 0.00, "0-3": 0.01, "4-6": 0.19, "7-10": 0.80},
 }
 
-#B52 P (LifeSatisfaction | Student)
+#B52 P (LifeSatisfaction | Student) #IT
 studentstat_LifeSatisfaction = {
     "UniStudent":     {"Under14yo": 0.00, "0-3": 0.02, "4-6": 0.19, "7-10": 0.79},
 }
 
-#B53 P (LifeSatisfaction | Education)
+#B53 P (LifeSatisfaction | Education) #IT
 education_LifeSatisfaction = {
     "UpperSecondary":     {"Under14yo": 0.00, "0-3": 0.03, "4-6": 0.22, "7-10": 0.75},
     "Tertiary":           {"Under14yo": 0.00, "0-3": 0.02, "4-6": 0.19, "7-10": 0.79},
 }
 
 
-#B54 P (TranspTime | employCommute)
+#B54 P (TranspTime | employCommute) #EmiliaR
 EmployCommute_TransTime = {
     "NotWorker": {"NotWorker": 1.00, "15m-": 0.00, "15-30m": 0.00, "30m+": 0.00},
     "InsideBO":  {"NotWorker": 0.00, "15m-": 0.65, "15-30m": 0.27, "30m+": 0.08},
@@ -521,7 +522,7 @@ EmployCommute_TransTime = {
     "Inward":    {"NotWorker": 0.00, "15m-": 0.05, "15-30m": 0.18, "30m+": 0.77},
 }
 
-#B55 P (TransTime | StudentCommute)
+#B55 P (TransTime | StudentCommute) #EmiliaR
 StudentCommute_TransTime = {
     "NotStudent": {"NotStudent": 1.00, "15m-": 0.00, "15-30m": 0.00, "30m+": 0.00},
     "InsideBO":   {"NotStudent": 0.00, "15m-": 0.44, "15-30m": 0.41, "30m+": 0.15},
@@ -529,7 +530,7 @@ StudentCommute_TransTime = {
     "Inward":     {"NotStudent": 0.00, "15m-": 0.03, "15-30m": 0.20, "30m+": 0.77},
 }
 
-#B56 P (MainTranspWorker | EmployCommute)
+#B56 P (MainTranspWorker | EmployCommute) #EmiliaR
 EmployCommute_MainTransp = {
     "NotWorker": {"NotWorker": 1.00, "Foot": 0.00, "Bike": 0.00, "PublicTrns": 0.00, "CarDriver": 0.00, "CarPassanger": 0.00, "MotorCycle": 0.00},
     "InsideBO":   {"NotWorker": 0.00, "Foot": 0.06, "Bike": 0.07, "PublicTrns": 0.20, "CarDriver": 0.23, "CarPassanger": 0.36, "MotorCycle": 0.08},
@@ -538,7 +539,7 @@ EmployCommute_MainTransp = {
 }
 
 
-#B57 P (MainTranspStud | StudentCommute)
+#B57 P (MainTranspStud | StudentCommute) #EmiliaR
 StudentCommute_MainTransp = {
     "NotStudent": {"NotStudent": 1.00, "Foot": 0.00, "Bike": 0.00, "PublicTrns": 0.00, "CarDriver": 0.00, "CarPassanger": 0.00, "MotorCycle": 0.00},
     "InsideBO":   {"NotStudent": 0.00, "Foot": 0.16, "Bike": 0.24, "PublicTrns": 0.52, "CarDriver": 0.02, "CarPassanger": 0.03, "MotorCycle": 0.03},
@@ -546,7 +547,7 @@ StudentCommute_MainTransp = {
     "Inward":     {"NotStudent": 0.00, "Foot": 0.00, "Bike": 0.01, "PublicTrns": 0.35, "CarDriver": 0.46, "CarPassanger": 0.14, "MotorCycle": 0.04},
 }
 
-#B58 P (TransTimeStud | MainTransStud)
+#B58 P (TransTimeStud | MainTransStud) #EmiliaR
 MainTranspStudnt_TranspTimeS = {
     "NotStudent":    {"NotStudent": 1.00, "15m-": 0.00, "15-30m": 0.00, "30m+": 0.00},
     "Foot":          {"NotStudent": 0.00, "15m-": 0.72, "15-30m": 0.22, "30m+": 0.06},
@@ -557,7 +558,7 @@ MainTranspStudnt_TranspTimeS = {
     "MotorCycle":    {"NotStudent": 0.00, "15m-": 0.51, "15-30m": 0.41, "30m+": 0.08},
 }
 
-#B59 P (TransTimeWork | MainTranspWorker)
+#B59 P (TransTimeWork | MainTranspWorker) #EmiliaR
 MainTranspWorker_TranspTimeW = {
     "NotWorker":     {"NotWorker": 1.00, "15m-": 0.00, "15-30m": 0.00, "30m+": 0.00},
     "Foot":          {"NotWorker": 0.00, "15m-": 0.85, "15-30m": 0.13, "30m+": 0.02},
@@ -574,7 +575,7 @@ MainTranspWorker_TranspTimeW = {
 #  Ternary CPTs                                                         #
 # ------------------------------------------------------------------ #
 
-# T1: P(marital | age, sex)
+# T1: P(marital | age, sex) #BO
 marital_age_sex = {
     "0-4": {
         "F": {"NeverMarried": 1.00, "Married": 0.00, "Divorced": 0.00, "Widowed": 0.00},
@@ -610,7 +611,7 @@ marital_age_sex = {
     },
 }
 
-# T2: P(education | citizenship, sex) 
+# T2: P(education | citizenship, sex) #NorthEast
 education_sex_citizenship = {
     "Italian": {
         "F":     {"SecondaryAndLess": 0.52, "UpperSecondary": 0.32, "Tertiary": 0.16},
@@ -623,7 +624,7 @@ education_sex_citizenship = {
 
 }
 
-# T3: P(Sex | StudentStat, age) 
+# T3: P(Sex | StudentStat, age) #BO
 sex_age_studentStat = {
     "UniStudent": {
         "15-24":     {"F": 0.58, "M": 0.42},
@@ -632,7 +633,7 @@ sex_age_studentStat = {
     },
 }
 
-#T4: employment age fulltimeParttime Fultime; age; sex
+#T4: employment age #NorthEast fulltimeParttime Fultime; age; sex 
 
 employment_age_sex = {
     "FullTime": {
@@ -647,7 +648,7 @@ employment_age_sex = {
 }
 
 
-#T5: employment sex citizenship
+#T5: employment sex citizenship #NorthEast
 employment_citizenship_sex = {
     "FullTime": {
         "Italian":     {"F": 0.37, "M": 0.63},
@@ -660,7 +661,7 @@ employment_citizenship_sex = {
 }
 
 
-#T6: employstat profession sex
+#T6: employstat profession sex #NorthEast
 profession_employstat_sex = {
     "AgricFishForest": {
         "Employee":     {"F": 0.29, "M": 0.71},
@@ -676,7 +677,7 @@ profession_employstat_sex = {
     },
 }
 
-#T7: 
+#T7: #NorthEast
 profession_employment_sex = {
     "AgricFishForest": {
         "FullTime":     {"F": 0.20, "M": 0.80},
@@ -693,7 +694,7 @@ profession_employment_sex = {
 }
 
 
-#T8:
+#T8: #NorthEast
 Profession_employment_employstat = {
     "AgricFishForest": {
         "FullTime":     {"Employee": 0.41, "SelfEmployed": 0.59},
@@ -709,7 +710,7 @@ Profession_employment_employstat = {
     },
 }
 
-#T9:
+#T9: #NorthEast
 employstat_citizenship_sex = {
     "SelfEmployed": {
         "Italian":     {"F": 0.31, "M": 0.69},
@@ -722,7 +723,7 @@ employstat_citizenship_sex = {
 }
 
 
-#T10
+#T10 #NorthEast
 profession_citizenship_sex = {
     "AgricFishForest": {
         "Italian":     {"F": 0.25, "M": 0.75},
@@ -738,7 +739,7 @@ profession_citizenship_sex = {
     },
 }
 
-#T11:
+#T11: #NorthEast
 profession_employstat_citizenship = {
     "AgricFishForest": {
         "SelfEmployed":   {"Italian": 0.99, "Foreigner": 0.01},
@@ -754,7 +755,7 @@ profession_employstat_citizenship = {
     },
 }
 
-#T12:
+#T12: #NorthEast
 occupation_citizenship_sex = {
     "Manager": {
         "Italian":         {"F": 0.45, "M": 0.55},
@@ -775,9 +776,11 @@ occupation_citizenship_sex = {
 }
 
 
-#T13:
+#T13: #IT
 sex_age_BMI = {
     "M": {
+        "0-4":         {"UnderAge": 1.00},
+        "5-14":        {"UnderAge": 1.00},
         "15-24":       {"UnderWeight": 0.05, "NormalWeight": 0.72, "OverWeight": 0.18, "Obese": 0.05},
         "25-34":       {"UnderWeight": 0.01, "NormalWeight": 0.58, "OverWeight": 0.32, "Obese": 0.09},
         "35-49":       {"UnderWeight": 0.01, "NormalWeight": 0.48, "OverWeight": 0.40, "Obese": 0.11},
@@ -786,6 +789,8 @@ sex_age_BMI = {
         "75+":         {"UnderWeight": 0.01, "NormalWeight": 0.38, "OverWeight": 0.47, "Obese": 0.14},
     },
     "F": {
+        "0-4":         {"UnderAge": 1.00},
+        "5-14":        {"UnderAge": 1.00},
         "15-24":       {"UnderWeight": 0.15, "NormalWeight": 0.68, "OverWeight": 0.13, "Obese": 0.04},
         "25-34":       {"UnderWeight": 0.10, "NormalWeight": 0.65, "OverWeight": 0.18, "Obese": 0.07},
         "35-49":       {"UnderWeight": 0.06, "NormalWeight": 0.64, "OverWeight": 0.22, "Obese": 0.08},
@@ -796,7 +801,7 @@ sex_age_BMI = {
 }
 
 
-#T14
+#T14 #IT
 occupation_sex_BMI = {
     "Manager": {
         "M":       {"UnderWeight": 0.00, "NormalWeight": 0.44, "OverWeight": 0.42, "Obese": 0.14},
@@ -808,7 +813,7 @@ occupation_sex_BMI = {
     },
 }
 
-#T15
+#T15 #IT
 StudentStat_Sex_BMI = {
     "UniStudent": {
         "M":       {"UnderWeight": 0.04, "NormalWeight": 0.75, "OverWeight": 0.17, "Obese": 0.04},
@@ -816,7 +821,7 @@ StudentStat_Sex_BMI = {
     },
 }
 
-#T16
+#T16 #IT
 sex_age_alcohol = {
     "M": {
         "0-4":   {"Never": 1.00, "Exceptionally": 0.00, "Consumer": 0.00},
@@ -840,7 +845,7 @@ sex_age_alcohol = {
     },
 }
 
-#T17
+#T17 #IT
 profession_sex_alcohol = {
     "Manager": {
         "F":   {"Never": 0.43, "Exceptionally": 0.30, "Consumer": 0.27},
@@ -853,7 +858,7 @@ profession_sex_alcohol = {
 }
 
 
-#T18 
+#T18 #IT
 age_sex_smoking = {
     "M": {
         "0-4":   {"Never": 1.00, "Former": 0.00, "1-5": 0.00, "6-10": 0.00, "11-20": 0.00, "20+": 0.00},
@@ -877,20 +882,20 @@ age_sex_smoking = {
     },
 }
 
-#T19
+#T19 #IT
 profession_sex_MainTranspWorker = {
     "Manager": {
-        "F":   {"NotWorker": 0.60, "Foot": 0.07, "Bike": 0.01, "PublicTrns": 0.01, "CarDriver": 0.28, "CarPassanger": 0.02, "MotorCycle": 0.01},
-        "M":   {"NotWorker": 0.48, "Foot": 0.10, "Bike": 0.01, "PublicTrns": 0.01, "CarDriver": 0.36, "CarPassanger": 0.01, "MotorCycle": 0.03},
+        "F":   {"NotWorker": 0.60, "Foot": 0.07, "Bike": 0.01, "PublicTrns": 0.08, "CarDriver": 0.18, "CarPassanger": 0.05, "MotorCycle": 0.01},
+        "M":   {"NotWorker": 0.48, "Foot": 0.10, "Bike": 0.01, "PublicTrns": 0.06, "CarDriver": 0.26, "CarPassanger": 0.06, "MotorCycle": 0.03},
     },
     "WhiteC": {
-        "F":   {"NotWorker": 0.60, "Foot": 0.05, "Bike": 0.01, "PublicTrns": 0.03, "CarDriver": 0.29, "CarPassanger": 0.02, "MotorCycle": 0.00},
-        "M":   {"NotWorker": 0.48, "Foot": 0.04, "Bike": 0.02, "PublicTrns": 0.03, "CarDriver": 0.39, "CarPassanger": 0.01, "MotorCycle": 0.03},
+        "F":   {"NotWorker": 0.60, "Foot": 0.05, "Bike": 0.01, "PublicTrns": 0.07, "CarDriver": 0.19, "CarPassanger": 0.07, "MotorCycle": 0.01},
+        "M":   {"NotWorker": 0.48, "Foot": 0.04, "Bike": 0.02, "PublicTrns": 0.07, "CarDriver": 0.29, "CarPassanger": 0.06, "MotorCycle": 0.04},
     },
 }
 
 
-#T20
+#T20 #IT
 profession_sex_TranspTimeWork = {
     "Manager": {
         "F":   {"NotWorker": 0.60, "15m-": 0.15, "15-30m": 0.21, "30m+": 0.04},
@@ -907,24 +912,24 @@ profession_sex_TranspTimeWork = {
 #  Impossible Combinations                                           #
 # ------------------------------------------------------------------ #
 
-#H1
+#H1 #BO
 h_age_marital = {
     "0-4":    {"NeverMarried": 1.00, "Married": 0.00, "Divorced": 0.00, "Widowed": 0.00},
     "5-14":   {"NeverMarried": 1.00, "Married": 0.00, "Divorced": 0.00, "Widowed": 0.00},
 }
 
-#H2
+#H2 #BO
 h_age_education = {
     "0-4":    {"SecondaryAndLess": 1.00, "UpperSecondary": 0.00, "Tertiary": 0.00},
     "5-14":   {"SecondaryAndLess": 1.00, "UpperSecondary": 0.00, "Tertiary": 0.00},
 }
 
-#H3
+#H3 #BO
 h_EmployCommute_ResidenceQ = {
     "Inward":    {"CommuteInward": 1.00, "Reno": 0.00, "Navile": 0.00, "Saragozza": 0.00, "SanDonato": 0.00, "SantoStefano": 0.00, "Savena": 0.00},
 }
 
-#H4
+#H4 #BO
 h_StudentCommute_ResidenceQ = {
     "Inward":    {"CommuteInward": 1.00, "Reno": 0.00, "Navile": 0.00, "Saragozza": 0.00, "SanDonato": 0.00, "SantoStefano": 0.00, "Savena": 0.00},
 }
@@ -932,197 +937,215 @@ h_StudentCommute_ResidenceQ = {
 # ------------------------------------------------------------------ #
 #  STRUCTURAL ZERO-MAPPING: STUDENTS (H5 - H7)
 # ------------------------------------------------------------------ #
+
+#H5 BO
 h_StudentStat_StudentCommute = {
     "NotStudent":    {"NotStudent": 1.00, "InsideBO": 0.00, "Outward": 0.00, "Inward": 0.00},
-    "SchoolStudent": {"NotStudent": 0.00, "InsideBO": 0.33, "Outward": 0.33, "Inward": 0.34},
-    "UniStudent":    {"NotStudent": 0.00, "InsideBO": 0.33, "Outward": 0.33, "Inward": 0.34},
+    "SchoolStudent": {"NotStudent": 0.00},
+    "UniStudent":    {"NotStudent": 0.00},
 }
 
+
+#H6 #BO
 h_StudentStat_MainTranspStudnt = {
     "NotStudent":    {"NotStudent": 1.00, "Foot": 0.00, "Bike": 0.00, "PublicTrns": 0.00, "CarDriver": 0.00, "CarPassanger": 0.00, "MotorCycle": 0.00},
-    "SchoolStudent": {"NotStudent": 0.00, "Foot": 0.16, "Bike": 0.16, "PublicTrns": 0.17, "CarDriver": 0.17, "CarPassanger": 0.17, "MotorCycle": 0.17},
-    "UniStudent":    {"NotStudent": 0.00, "Foot": 0.16, "Bike": 0.16, "PublicTrns": 0.17, "CarDriver": 0.17, "CarPassanger": 0.17, "MotorCycle": 0.17},
+    "SchoolStudent": {"NotStudent": 0.00},
+    "UniStudent":    {"NotStudent": 0.00},
 }
 
+#H7 #BO
 h_StudentStat_TranspTimeStud = {
     "NotStudent":    {"NotStudent": 1.00, "15m-": 0.00, "15-30m": 0.00, "30m+": 0.00},
-    "SchoolStudent": {"NotStudent": 0.00, "15m-": 0.33, "15-30m": 0.33, "30m+": 0.34},
-    "UniStudent":    {"NotStudent": 0.00, "15m-": 0.33, "15-30m": 0.33, "30m+": 0.34},
+    "SchoolStudent": {"NotStudent": 0.00},
+    "UniStudent":    {"NotStudent": 0.00},
 }
 
 # ------------------------------------------------------------------ #
 #  STRUCTURAL ZERO-MAPPING: EMPLOY_STAT (H8 - H13)
 # ------------------------------------------------------------------ #
+#H8 #BO
 h_employstat_wage = {
     "NotWorker":    {"NotWorker": 1.00, "Low": 0.00, "Medium": 0.00, "High": 0.00, "VeryHigh": 0.00},
-    "SelfEmployed": {"NotWorker": 0.00, "Low": 0.25, "Medium": 0.25, "High": 0.25, "VeryHigh": 0.25},
-    "Employee":     {"NotWorker": 0.00, "Low": 0.25, "Medium": 0.25, "High": 0.25, "VeryHigh": 0.25},
+    "SelfEmployed": {"NotWorker": 0.00},
+    "Employee":     {"NotWorker": 0.00},
 }
 
+#H9 #BO
 h_employstat_employcommute = {
     "NotWorker":    {"NotWorker": 1.00, "InsideBO": 0.00, "Outward": 0.00, "Inward": 0.00},
-    "SelfEmployed": {"NotWorker": 0.00, "InsideBO": 0.33, "Outward": 0.33, "Inward": 0.34},
-    "Employee":     {"NotWorker": 0.00, "InsideBO": 0.33, "Outward": 0.33, "Inward": 0.34},
+    "SelfEmployed": {"NotWorker": 0.00},
+    "Employee":     {"NotWorker": 0.00},
 }
 
+#H10 #BO
 h_employstat_Profession = {
     "NotWorker":    {"NotWorker": 1.00, "AgricFishForest": 0.00, "Industry": 0.00, "Services": 0.00},
-    "SelfEmployed": {"NotWorker": 0.00, "AgricFishForest": 0.33, "Industry": 0.33, "Services": 0.34},
-    "Employee":     {"NotWorker": 0.00, "AgricFishForest": 0.33, "Industry": 0.33, "Services": 0.34},
+    "SelfEmployed": {"NotWorker": 0.00},
+    "Employee":     {"NotWorker": 0.00},
 }
 
+#H11 #BO
 h_employstat_Occupation = {
     "NotWorker":    {"NotWorker": 1.00, "Manager": 0.00, "WhiteC": 0.00, "BlueC": 0.00, "Elementary": 0.00},
-    "SelfEmployed": {"NotWorker": 0.00, "Manager": 0.25, "WhiteC": 0.25, "BlueC": 0.25, "Elementary": 0.25},
-    "Employee":     {"NotWorker": 0.00, "Manager": 0.25, "WhiteC": 0.25, "BlueC": 0.25, "Elementary": 0.25},
+    "SelfEmployed": {"NotWorker": 0.00},
+    "Employee":     {"NotWorker": 0.00},
 }
 
+#H12 #BO
 h_employstat_MainTranspWorker = {
     "NotWorker":    {"NotWorker": 1.00, "Foot": 0.00, "Bike": 0.00, "PublicTrns": 0.00, "CarDriver": 0.00, "CarPassanger": 0.00, "MotorCycle": 0.00},
-    "SelfEmployed": {"NotWorker": 0.00, "Foot": 0.16, "Bike": 0.16, "PublicTrns": 0.17, "CarDriver": 0.17, "CarPassanger": 0.17, "MotorCycle": 0.17},
-    "Employee":     {"NotWorker": 0.00, "Foot": 0.16, "Bike": 0.16, "PublicTrns": 0.17, "CarDriver": 0.17, "CarPassanger": 0.17, "MotorCycle": 0.17},
+    "SelfEmployed": {"NotWorker": 0.00},
+    "Employee":     {"NotWorker": 0.00},
 }
 
+#H13 #BO
 h_employstat_TranspTimeWorker = {
     "NotWorker":    {"NotWorker": 1.00, "15m-": 0.00, "15-30m": 0.00, "30m+": 0.00},
-    "SelfEmployed": {"NotWorker": 0.00, "15m-": 0.33, "15-30m": 0.33, "30m+": 0.34},
-    "Employee":     {"NotWorker": 0.00, "15m-": 0.33, "15-30m": 0.33, "30m+": 0.34},
+    "SelfEmployed": {"NotWorker": 0.00},
+    "Employee":     {"NotWorker": 0.00},
 }
 
 # ------------------------------------------------------------------ #
 #  STRUCTURAL ZERO-MAPPING: WORKERS (H14 - H20)
 # ------------------------------------------------------------------ #
+#H14 #BO
 h_employment_employstat = {
     "Unemployed": {"NotWorker": 1.00, "SelfEmployed": 0.00, "Employee": 0.00},
     "NotInLF":    {"NotWorker": 1.00, "SelfEmployed": 0.00, "Employee": 0.00},
-    "FullTime":   {"NotWorker": 0.00, "SelfEmployed": 0.50, "Employee": 0.50},
-    "PartTime":   {"NotWorker": 0.00, "SelfEmployed": 0.50, "Employee": 0.50},
+    "FullTime":   {"NotWorker": 0.00},
+    "PartTime":   {"NotWorker": 0.00},
 }
 
+#H15 #BO
 h_employment_wage = {
     "Unemployed": {"NotWorker": 1.00, "Low": 0.00, "Medium": 0.00, "High": 0.00, "VeryHigh": 0.00},
     "NotInLF":    {"NotWorker": 1.00, "Low": 0.00, "Medium": 0.00, "High": 0.00, "VeryHigh": 0.00},
-    "FullTime":   {"NotWorker": 0.00, "Low": 0.25, "Medium": 0.25, "High": 0.25, "VeryHigh": 0.25},
-    "PartTime":   {"NotWorker": 0.00, "Low": 0.25, "Medium": 0.25, "High": 0.25, "VeryHigh": 0.25},
+    "FullTime":   {"NotWorker": 0.00},
+    "PartTime":   {"NotWorker": 0.00},
 }
 
+#H16 #BO
 h_employment_employcommute = {
     "Unemployed": {"NotWorker": 1.00, "InsideBO": 0.00, "Outward": 0.00, "Inward": 0.00},
     "NotInLF":    {"NotWorker": 1.00, "InsideBO": 0.00, "Outward": 0.00, "Inward": 0.00},
-    "FullTime":   {"NotWorker": 0.00, "InsideBO": 0.33, "Outward": 0.33, "Inward": 0.34},
-    "PartTime":   {"NotWorker": 0.00, "InsideBO": 0.33, "Outward": 0.33, "Inward": 0.34},
+    "FullTime":   {"NotWorker": 0.00},
+    "PartTime":   {"NotWorker": 0.00},
 }
 
+#H17 #BO
 h_employment__Profession = {
     "Unemployed": {"NotWorker": 1.00, "AgricFishForest": 0.00, "Industry": 0.00, "Services": 0.00},
     "NotInLF":    {"NotWorker": 1.00, "AgricFishForest": 0.00, "Industry": 0.00, "Services": 0.00},
-    "FullTime":   {"NotWorker": 0.00, "AgricFishForest": 0.33, "Industry": 0.33, "Services": 0.34},
-    "PartTime":   {"NotWorker": 0.00, "AgricFishForest": 0.33, "Industry": 0.33, "Services": 0.34},
+    "FullTime":   {"NotWorker": 0.00},
+    "PartTime":   {"NotWorker": 0.00},
 }
 
+#H18 #BO
 h_employment__Occupation = {
     "Unemployed": {"NotWorker": 1.00, "Manager": 0.00, "WhiteC": 0.00, "BlueC": 0.00, "Elementary": 0.00},
     "NotInLF":    {"NotWorker": 1.00, "Manager": 0.00, "WhiteC": 0.00, "BlueC": 0.00, "Elementary": 0.00},
-    "FullTime":   {"NotWorker": 0.00, "Manager": 0.25, "WhiteC": 0.25, "BlueC": 0.25, "Elementary": 0.25},
-    "PartTime":   {"NotWorker": 0.00, "Manager": 0.25, "WhiteC": 0.25, "BlueC": 0.25, "Elementary": 0.25},
+    "FullTime":   {"NotWorker": 0.00},
+    "PartTime":   {"NotWorker": 0.00},
 }
 
+#H19 #BO
 h_employment_MainTranspWorker = {
     "Unemployed": {"NotWorker": 1.00, "Foot": 0.00, "Bike": 0.00, "PublicTrns": 0.00, "CarDriver": 0.00, "CarPassanger": 0.00, "MotorCycle": 0.00},
     "NotInLF":    {"NotWorker": 1.00, "Foot": 0.00, "Bike": 0.00, "PublicTrns": 0.00, "CarDriver": 0.00, "CarPassanger": 0.00, "MotorCycle": 0.00},
-    "FullTime":   {"NotWorker": 0.00, "Foot": 0.16, "Bike": 0.16, "PublicTrns": 0.17, "CarDriver": 0.17, "CarPassanger": 0.17, "MotorCycle": 0.17},
-    "PartTime":   {"NotWorker": 0.00, "Foot": 0.16, "Bike": 0.16, "PublicTrns": 0.17, "CarDriver": 0.17, "CarPassanger": 0.17, "MotorCycle": 0.17},
+    "FullTime":   {"NotWorker": 0.00},
+    "PartTime":   {"NotWorker": 0.00},
 }
 
+#H20 #BO
 h_employment__TranspTimeWorker = {
     "Unemployed": {"NotWorker": 1.00, "15m-": 0.00, "15-30m": 0.00, "30m+": 0.00},
     "NotInLF":    {"NotWorker": 1.00, "15m-": 0.00, "15-30m": 0.00, "30m+": 0.00},
-    "FullTime":   {"NotWorker": 0.00, "15m-": 0.33, "15-30m": 0.33, "30m+": 0.34},
-    "PartTime":   {"NotWorker": 0.00, "15m-": 0.33, "15-30m": 0.33, "30m+": 0.34},
+    "FullTime":   {"NotWorker": 0.00},
+    "PartTime":   {"NotWorker": 0.00},
 }
 
-#H21
+#H21 #BO
 h_age_BMI = {
     "0-4":    {"UnderAge": 1.00, "UnderWeight": 0.00, "NormalWeight": 0.00, "OverWeight": 0.00, "Obese": 0.00},
     "5-14":   {"UnderAge": 1.00, "UnderWeight": 0.00, "NormalWeight": 0.00, "OverWeight": 0.00, "Obese": 0.00},
 }
 
-#H22
+#H22 #BO
 h_age_alcoholCons = {
     "0-4":   {"Never": 1.00, "Exceptionally": 0.00, "Consumer": 0.00},
     "5-14":  {"Never": 0.99, "Exceptionally": 0.01, "Consumer": 0.00},
 }
 
-#H23
+#H23 #BO
 h_age_smoking = {
     "0-4":   {"Never": 1.00, "Former": 0.00, "1-5": 0.00, "6-10": 0.00, "11-20": 0.00, "20+": 0.00},
     "5-14":  {"Never": 1.00, "Former": 0.00, "1-5": 0.00, "6-10": 0.00, "11-20": 0.00, "20+": 0.00},
 }
 
-#H24
+#H24 #BO
 h_SundayOut_age = {
     "Under3yo": {"0-4": 1.00, "5-14": 0.00, "15-24": 0.00, "25-34": 0.00, "35-49": 0.00, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
-#H25
+#H25 #BO
 h_SaturdayOut_age = {
     "Under3yo": {"0-4": 1.00, "5-14": 0.00, "15-24": 0.00, "25-34": 0.00, "35-49": 0.00, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
-#H26
+#H26 #BO
 h_WeekDayOut_age = {
     "Under3yo": {"0-4": 1.00, "5-14": 0.00, "15-24": 0.00, "25-34": 0.00, "35-49": 0.00, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
-#H27
+#H27 #BO
 h_SunSocialEnterT_age = {
     "Under3yo": {"0-4": 1.00, "5-14": 0.00, "15-24": 0.00, "25-34": 0.00, "35-49": 0.00, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
-#H28
+#H28 #BO
 h_SatSocialEnterT_age = {
     "Under3yo": {"0-4": 1.00, "5-14": 0.00, "15-24": 0.00, "25-34": 0.00, "35-49": 0.00, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
-#H29
+#H29 #BO
 h_WeekDSocialEnterT_age = {
     "Under3yo": {"0-4": 1.00, "5-14": 0.00, "15-24": 0.00, "25-34": 0.00, "35-49": 0.00, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
-#H30
+#H30 #BO
 h_SunSportOutD_age = {
     "Under3yo": {"0-4": 1.00, "5-14": 0.00, "15-24": 0.00, "25-34": 0.00, "35-49": 0.00, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
-#H31
+#H31 #BO
 h_SatSportOutD_age = {
     "Under3yo": {"0-4": 1.00, "5-14": 0.00, "15-24": 0.00, "25-34": 0.00, "35-49": 0.00, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
-#H32
+#H32 #BO
 h_WeekDSportOutD_age = {
     "Under3yo": {"0-4": 1.00, "5-14": 0.00, "15-24": 0.00, "25-34": 0.00, "35-49": 0.00, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
-#H33
+#H33 #BO
 h_age_LifeSatisfaction = {
     "0-4":  {"Under14yo": 1.00, "0-3": 0.00, "4-6": 0.00, "7-10": 0.00},
     "5-14": {"Under14yo": 1.00, "0-3": 0.00, "4-6": 0.00, "7-10": 0.00},
 }
 
-#H34
+#H34 #BO
 h_age_employment = {
     "0-4":  {"FullTime": 0.00, "PartTime": 0.00, "Unemployed": 0.00, "NotInLF": 1.00},
     "5-14": {"FullTime": 0.00, "PartTime": 0.00, "Unemployed": 0.00, "NotInLF": 1.00},
 }
 
-#H35
+#H35 #BO
 h_age_employstat = {
     "0-4":  {"NotWorker": 1.00, "SelfEmployed": 0.00, "Employee": 0.00},
     "5-14": {"NotWorker": 1.00, "SelfEmployed": 0.00, "Employee": 0.00},
 }
 
-#H36
+#H36 #BO
 h_age_Wage = {
     "0-4":  {"NotWorker": 1.00, "Low": 0.00, "Medium": 0.00, "High": 0.00, "VeryHigh": 0.00},
     "5-14": {"NotWorker": 1.00, "Low": 0.00, "Medium": 0.00, "High": 0.00, "VeryHigh": 0.00},
@@ -1130,7 +1153,7 @@ h_age_Wage = {
 
 
 
-# H37: P(StudentStat | age) — only the fully-determined impossible rows
+# H37: P(StudentStat | age)  #BO — only the fully-determined impossible rows
 h_age_StudentStat = {
     "0-4":   {"NotStudent": 1.00, "SchoolStudent": 0.00, "UniStudent": 0.00},
     "50-64": {"NotStudent": 1.00, "SchoolStudent": 0.00, "UniStudent": 0.00},
@@ -1140,62 +1163,83 @@ h_age_StudentStat = {
 
 
 
-# H38: P(StudentStat | employment) 
+# H38: P(StudentStat | employment)  #BO 
 h_employment_StudentStat = {
     "FullTime": {"NotStudent": 1.00, "SchoolStudent": 0.00, "UniStudent": 0.00},
 }
 
-# H39: only the hard zeros — Occupation Profession cascade.
-# The non-zero distribution within workers comes from existing profession occupation CPTs
+# H39  #BO
+
 h_Occupation_Profession = {
-    "Manager":    {"NotWorker": 0.00, "AgricFishForest": 0.04,
-                   "Industry": 0.20, "Services": 0.76},  
-    "WhiteC":     {"NotWorker": 0.00, "AgricFishForest": 0.00,
-                   "Industry": 0.25, "Services": 0.75},  
-    "BlueC":      {"NotWorker": 0.00, "AgricFishForest": 0.04,
-                   "Industry": 0.32, "Services": 0.64},
-    "Elementary": {"NotWorker": 0.00, "AgricFishForest": 0.24,
-                   "Industry": 0.35, "Services": 0.41},
+    "Manager":    {"NotWorker": 0.00, "AgricFishForest": 0.04, "Industry": 0.20, "Services": 0.76},
+    "WhiteC":     {"NotWorker": 0.00, "AgricFishForest": 0.00, "Industry": 0.25, "Services": 0.75},
+    "BlueC":      {"NotWorker": 0.00, "AgricFishForest": 0.04, "Industry": 0.32, "Services": 0.64},
+    "Elementary": {"NotWorker": 0.00, "AgricFishForest": 0.24, "Industry": 0.35, "Services": 0.41},
 }
 
+#H40 #BO
 h_Profession_Occupation = {
-    "AgricFishForest": {"NotWorker": 0.00, "Manager": 0.38,
-                        "WhiteC": 0.05, "BlueC": 0.55, "Elementary": 0.02},
-    "Industry":        {"NotWorker": 0.00, "Manager": 0.16,
-                        "WhiteC": 0.31, "BlueC": 0.49, "Elementary": 0.04},
-    "Services":        {"NotWorker": 0.00, "Manager": 0.30,
-                        "WhiteC": 0.39, "BlueC": 0.25, "Elementary": 0.06},
+    "AgricFishForest": {"NotWorker": 0.00, "Manager": 0.38, "WhiteC": 0.05, "BlueC": 0.55, "Elementary": 0.02},
+    "Industry":        {"NotWorker": 0.00, "Manager": 0.16, "WhiteC": 0.31, "BlueC": 0.49, "Elementary": 0.04},
+    "Services":        {"NotWorker": 0.00, "Manager": 0.30, "WhiteC": 0.39, "BlueC": 0.25, "Elementary": 0.06},
 }
 
 
 
-# H41: commute direction consistency — only the hard geometric impossibilities.
+# H41  #BO : commute direction consistency — only the hard geometric impossibilities.
 h_employcommute_studentcommute = {
     "Inward":   {"NotStudent": 0.93, "InsideBO": 0.00, "Outward": 0.00, "Inward": 0.07},
     "Outward":  {"NotStudent": 1.00, "InsideBO": 0.00, "Outward": 0.00, "Inward": 0.00},
 }
 
 
-# H42: transport identity — off-diagonal zeros when both commuting.
-# NotWorker share (0.85) = rough estimate of P(not employed | student).
-# The zeros are structurally guaranteed; the 0.85/0.15 split is an estimate.
+# H42  #BO : transport identity — off-diagonal zeros when both commuting.
 h_MainTranspStudnt_MainTranspWorker = {
-    "Foot":        {"NotWorker": 0.85, "Foot": 0.15, "Bike": 0.00,
+    "Foot":        {"Bike": 0.00,
                     "PublicTrns": 0.00, "CarDriver": 0.00,
                     "CarPassanger": 0.00, "MotorCycle": 0.00},
-    "Bike":        {"NotWorker": 0.85, "Foot": 0.00, "Bike": 0.15,
+    "Bike":        {"Foot": 0.00,
                     "PublicTrns": 0.00, "CarDriver": 0.00,
                     "CarPassanger": 0.00, "MotorCycle": 0.00},
-    "PublicTrns":  {"NotWorker": 0.85, "Foot": 0.00, "Bike": 0.00,
-                    "PublicTrns": 0.15, "CarDriver": 0.00,
+    "PublicTrns":  {"Foot": 0.00, "Bike": 0.00, "CarDriver": 0.00,
                     "CarPassanger": 0.00, "MotorCycle": 0.00},
-    "CarDriver":   {"NotWorker": 0.85, "Foot": 0.00, "Bike": 0.00,
-                    "PublicTrns": 0.00, "CarDriver": 0.15,
+    "CarDriver":   {"Foot": 0.00, "Bike": 0.00,
+                    "PublicTrns": 0.00,
                     "CarPassanger": 0.00, "MotorCycle": 0.00},
-    "CarPassanger":{"NotWorker": 0.85, "Foot": 0.00, "Bike": 0.00,
+    "CarPassanger":{"Foot": 0.00, "Bike": 0.00,
                     "PublicTrns": 0.00, "CarDriver": 0.00,
-                    "CarPassanger": 0.15, "MotorCycle": 0.00},
-    "MotorCycle":  {"NotWorker": 0.85, "Foot": 0.00, "Bike": 0.00,
+                    "MotorCycle": 0.00},
+    "MotorCycle":  {"Foot": 0.00, "Bike": 0.00,
                     "PublicTrns": 0.00, "CarDriver": 0.00,
-                    "CarPassanger": 0.00, "MotorCycle": 0.15},
+                    "CarPassanger": 0.00},
 }
+
+# H43 #BO : Commuter cannot be both not student and not worker
+h_ResidenceQ_EmployCommute_StudentCommute = {
+    "CommuteInward": {
+        "NotWorker": {"NotStudent": 0.0, "Inward": 1.0},
+    },
+}
+
+#H44 #BO
+h_ResidenceQ_StudentCommute_EmployCommute = {
+    "CommuteInward": {
+        "NotStudent": {"NotWorker": 0.0, "Inward": 1.0},
+    },
+}
+
+#H45 #BO
+h_EmployCommute_StudentCommute_ResidenceQ = {
+    "NotWorker": {
+        "NotStudent": {"CommuteInward": 0.0, "Reno": 0.15, "Navile": 0.15, "Saragozza": 0.15, "SanDonato": 0.15, "SantoStefano": 0.20, "Savena": 0.20},
+    },
+}
+
+#H46 #BO
+h_StudentCommute_EmployCommute_ResidenceQ = {
+    "NotStudent": {
+        "NotWorker": {"CommuteInward": 0.0, "Reno": 0.15, "Navile": 0.15, "Saragozza": 0.15, "SanDonato": 0.15, "SantoStefano": 0.20, "Savena": 0.20},
+    },
+}
+
+
