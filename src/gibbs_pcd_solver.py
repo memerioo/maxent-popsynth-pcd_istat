@@ -64,8 +64,20 @@ class GibbsPCDSolver:
 
     def __init__(self, cs: ConstraintSet, use_numba: bool = False,
                  weights: np.ndarray | None = None,
-                 sources: list | None = None):
+                 sources: list | None = None,
+                 blocks: list | None = None):
         """
+        blocks : list of dicts or None
+            Sentinel blocks from `istat.structural_blocks.resolve_blocks`.
+            When supplied, each outer iteration runs a Metropolis-Hastings
+            block-toggle sweep (block_moves.py) in addition to the Gibbs
+            sweeps.  This is REQUIRED whenever structural zeros are pinned
+            hard: single-site Gibbs cannot move an individual between the
+            active and inactive basin of a sentinel block (it would have to
+            flip up to eight attributes at once, and every intermediate
+            state has weight e^-30), so without block moves the block
+            composition is frozen at its initial value and quantities such
+            as P(employment) and P(StudentStat) can never be fitted.
         weights : (m,) array or None
             Per-constraint reliability weights W_jj for the soft-constraint
             objective  Phi_W(lambda) = logZ(lambda) - lambda^T alpha
@@ -111,6 +123,20 @@ class GibbsPCDSolver:
             self._numba_kernel = _make_gibbs_numba_kernel()
             if self._numba_kernel is not None:
                 self._numba_args = self._prepare_numba_lookup()
+
+        # Sentinel-block MH moves (see block_moves.py)
+        self.blocks = blocks
+        self._blocks_prepared = None
+        self._block_kernel = None
+        if blocks:
+            from istat.block_moves import prepare_block, make_block_toggle_kernel
+            self._blocks_prepared = []
+            for b in blocks:
+                p = prepare_block(cs, b["attrs_idx"])
+                p["name"] = b["name"]
+                self._blocks_prepared.append(p)
+            if use_numba:
+                self._block_kernel = make_block_toggle_kernel()
 
         # Results (populated by fit)
         self.lambdas:      np.ndarray | None = None
@@ -253,7 +279,11 @@ class GibbsPCDSolver:
             lr_patience:    int   = 0,
             lr_decay:       float = 0.5,
             lr_min:         float | None = None,
+            plateau_smooth: int   = 25,
+            lr_schedule:    str   = 'plateau',
             selection_metric: str = 'auto',
+            init_pool:      np.ndarray | None = None,
+            block_move_frac: float = 1.0,
             verbose_every:  int   = 50) -> 'GibbsPCDSolver':
         """
         Fit GibbsPCDSolver using Adam optimiser with adaptive stopping and L2 Regularization.
@@ -321,7 +351,49 @@ class GibbsPCDSolver:
             _seed_numba_rng(seed)
 
         lam  = np.zeros(self.m, dtype=np.float64)
-        pool = self._init_pool(N_pool, seed=seed)
+
+        # ── Structural zeros are HARD constraints, not learned targets ──────
+        # A target of exactly 0 encodes a logical impossibility. Learning it
+        # by gradient descent does not work: Adam's normalised step has
+        # magnitude ~lr per iteration, so over T iterations lambda_j can only
+        # travel about lr*T. At lr=0.005 and T=1300 that is only ~-6, an odds
+        # factor e^-6 = 2.5e-3 -- which at N=500,000 still leaves thousands of
+        # logically impossible individuals in the pool. Worse, the gradient of
+        # a zero-target constraint is alpha_hat itself, so as alpha_hat falls
+        # below eps the Adam ratio g/(|g|+eps) collapses and the descent
+        # stalls before the constraint is enforced.
+        # Instead we pin these parameters at the clip value and freeze them:
+        # e^-30 = 1e-13 makes the configuration unreachable. Both Gibbs paths
+        # apply max-subtraction before exponentiating, so this is safe even
+        # when several structural zeros overlap on one cell.
+        structural = (self.alphas == 0.0)
+        lam[structural] = -30.0
+
+        # Pool initialisation.  A uniform pool is fine ONLY when block moves
+        # are enabled: with hard structural zeros the block composition of a
+        # uniform pool is otherwise frozen forever at its random initial
+        # value (~0.21 non-students against a target of 0.72).  Passing a
+        # legal, on-target `init_pool` (see structural_blocks.ancestral_init_pool)
+        # additionally saves the block moves the work of walking the
+        # composition all the way from noise to the published targets.
+        if init_pool is not None:
+            if init_pool.shape != (N_pool, self.K):
+                raise ValueError(
+                    f"init_pool must have shape ({N_pool}, {self.K}), "
+                    f"got {init_pool.shape}")
+            pool = np.ascontiguousarray(init_pool, dtype=np.int32).copy()
+        else:
+            pool = self._init_pool(N_pool, seed=seed)
+            if not self._blocks_prepared:
+                import warnings
+                warnings.warn(
+                    "Uniform pool init with hard structural zeros and no "
+                    "sentinel blocks: block composition will be frozen at "
+                    "its random initial value. Pass blocks= and/or init_pool=.",
+                    RuntimeWarning)
+
+        self.block_accept_: list = []
+        self.block_accept_by_name_: list = []
 
         sweep_fn = (self._gibbs_sweep_numba
                     if (self.use_numba and self._numba_kernel is not None)
@@ -351,12 +423,66 @@ class GibbsPCDSolver:
         # Precompute mask for empirical constraints to protect structural zeros
         empirical_mask = self.alphas > 0.0
 
+        # ── Learning-rate schedule ────────────────────────────────────────
+        # 'plateau' : reactive reduce-on-plateau (the original behaviour).
+        #             lr stays FLAT until the smoothed metric stalls, which
+        #             means it is still at its initial value during the phase
+        #             where the Adam limit cycle grows, and then drops in a
+        #             few sudden steps that collapse the cycle abruptly.
+        # 'cosine'  : lr decreases monotonically from `lr` to `lr_min` over
+        #             the full n_outer iterations. Because the total
+        #             parameter travel is sum_t lr_t and the oscillation
+        #             amplitude scales with the CURRENT lr, a cosine schedule
+        #             can deliver the same travel as a flat-then-decay
+        #             schedule while never sitting at the large step size
+        #             long enough for the cycle to grow. Set `lr` ~30% higher
+        #             than the plateau equivalent to match travel.
+        # 'exp'     : geometric decay from `lr` to `lr_min` over n_outer.
+        if lr_schedule not in ('plateau', 'cosine', 'exp'):
+            raise ValueError("lr_schedule must be 'plateau', 'cosine' or 'exp'")
+
+        def _scheduled_lr(t):
+            frac = (t - 1) / max(n_outer - 1, 1)
+            if lr_schedule == 'cosine':
+                return lr_floor + (lr - lr_floor) * 0.5 * (1.0 + np.cos(np.pi * frac))
+            return lr * (lr_floor / lr) ** frac      # 'exp'
+
         # lr reduce-on-plateau state
         lr_eff        = lr
+        score_hist: list[float] = []
         lr_floor      = lr_min if lr_min is not None else lr / 20.0
         since_improve = 0
 
         for t in range(1, n_outer + 1):
+
+            # Block-toggle MH sweep: the ONLY move that can transport an
+            # individual across a sentinel boundary once the structural
+            # zeros are hard. Run before the Gibbs sweeps so that the
+            # sweeps immediately relax the interior of any block that has
+            # just been switched.
+            acc_rate = float('nan')
+            acc_by_block = {}
+            if self._blocks_prepared:
+                from istat.block_moves import block_toggle
+                n_acc = n_try = 0
+                for blk in self._blocks_prepared:
+                    a, n = block_toggle(pool, lam, blk, self._rng,
+                                        kernel=self._block_kernel,
+                                        frac=block_move_frac)
+                    n_acc += a
+                    n_try += n
+                    # Per-block rate, not just the mean. The mean can hide a
+                    # block that has re-frozen: a permissive block (e.g.
+                    # under3, whose attributes are loosely coupled) accepts
+                    # readily and can keep the average healthy while the work
+                    # block quietly drops towards zero acceptance. A rate
+                    # below ~0.05 on ANY block means that block's composition
+                    # is no longer mixing and its marginals are pinned at
+                    # their initial values.
+                    acc_by_block[blk["name"]] = a / max(n, 1)
+                acc_rate = n_acc / max(n_try, 1)
+                self.block_accept_.append(acc_rate)
+                self.block_accept_by_name_.append(dict(acc_by_block))
 
             # Inner loop: Gibbs sweeps on persistent pool
             for _ in range(n_gibbs_sweeps):
@@ -392,7 +518,8 @@ class GibbsPCDSolver:
             m2h = m2 / (1.0 - beta2 ** t)
 
             lam -= lr_eff * self.weights * m1h / (np.sqrt(m2h) + eps)
-            lam = np.clip(lam, -30.0, 30.0)  
+            lam = np.clip(lam, -30.0, 30.0)
+            lam[structural] = -30.0      # keep hard constraints hard  
 
             # Create a mask for valid targets (ignoring the exact zeros)
             min_prob_threshold = 1e-3
@@ -412,9 +539,40 @@ class GibbsPCDSolver:
             else:
                 mre = mae = weighted_mre = weighted_mae = 0.0
 
-            score = weighted_mre if selection_metric == 'weighted_mre' else mre
+            raw_score = weighted_mre if selection_metric == 'weighted_mre' else mre
 
-            ## ------ BEST POOL TRACKER (selects on `selection_metric`) ------
+            # ── Smoothed selection score ──────────────────────────────────
+            # Every decision below (best snapshot, plateau detection, early
+            # stopping) is made on a TRAILING MEAN rather than on the single
+            # noisy iterate, because both decisions are pathological on a raw
+            # stochastic metric:
+            #
+            #   * plateau detection. `since_improve` resets on any new best,
+            #     and with Monte-Carlo noise a lucky trough appears every few
+            #     dozen iterations by chance. With a large lr_patience the
+            #     counter then never reaches the threshold, the learning rate
+            #     never decays, and the run oscillates at full lr forever.
+            #     Observed directly: at N=30,000 with lr_patience=150 not one
+            #     decay fired in 1,440 iterations and the wMRE swing was 49%
+            #     of its mean, against 19% for the same solver at N=50,000
+            #     once the lr had decayed.
+            #
+            #   * best-snapshot selection. Taking the minimum of a noisy
+            #     sequence returns whichever iterate was luckiest, not the
+            #     best model: the reported metric is then a downward-biased
+            #     estimate of the model actually being delivered. Smoothing
+            #     first removes that bias.
+            #
+            # The trailing mean lags the true curve by ~smooth/2 iterations,
+            # which is harmless here: the pool is a valid sample of p_lambda
+            # at every iteration, so a snapshot chosen slightly late is still
+            # a correct snapshot.
+            score_hist.append(raw_score)
+            if len(score_hist) > plateau_smooth:
+                score_hist.pop(0)
+            score = float(np.mean(score_hist))
+
+            ## ------ BEST POOL TRACKER (selects on smoothed metric) ------
             if score < best_score:
                 best_score = score
                 best_mre   = mre
@@ -425,8 +583,14 @@ class GibbsPCDSolver:
             else:
                 since_improve += 1
 
+            # deterministic schedules override the reactive one
+            if lr_schedule != 'plateau':
+                lr_eff = _scheduled_lr(t)
+
             # reduce-on-plateau lr decay
-            if lr_patience > 0 and since_improve >= lr_patience and lr_eff > lr_floor:
+            if (lr_schedule == 'plateau'
+                    and lr_patience > 0 and since_improve >= lr_patience
+                    and lr_eff > lr_floor):
                 lr_eff = max(lr_floor, lr_eff * lr_decay)
                 since_improve = 0
                 if verbose_every:
@@ -440,18 +604,29 @@ class GibbsPCDSolver:
                 'weighted_mre': weighted_mre,
                 'weighted_mae': weighted_mae,
                 'lr':           lr_eff,
+                'block_accept': acc_rate,
+                'block_accept_by_name': dict(acc_by_block),
+                'score_smooth': score,
                 'alpha_hat':    alpha_hat.copy(),
                 'elapsed':      time.time() - t_start,
             })
 
             if verbose_every and t % verbose_every == 0:
                 extra = f"  wMRE={weighted_mre:.5f}" if weighted else ""
+                if self._blocks_prepared:
+                    per = " ".join(f"{k[:4]}={v:.2f}"
+                                   for k, v in acc_by_block.items())
+                    extra += f"  blkAcc={acc_rate:.3f} [{per}]"
                 print(f"  [Gibbs] iter {t:4d}  MRE={mre:.5f}  MAE={mae:.5f}{extra}  "
                       f"N={N_pool}  t={time.time()-t_start:.1f}s")
 
             if tol > 0.0 and t >= 2 * window:
-                recent_min  = min(h[selection_metric] for h in self.history[-window:])
-                earlier_min = min(h[selection_metric] for h in
+                # Compare smoothed scores, for the same reason the plateau
+                # detector does: the minimum of a raw noisy series is an
+                # outlier, so `rel_improv` computed from raw minima measures
+                # noise rather than progress.
+                recent_min  = min(h['score_smooth'] for h in self.history[-window:])
+                earlier_min = min(h['score_smooth'] for h in
                                   self.history[-2*window:-window])
                 if earlier_min > 0:
                     rel_improv = (earlier_min - recent_min) / earlier_min
