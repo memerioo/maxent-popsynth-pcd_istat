@@ -81,7 +81,7 @@ marginals = {
     "Health":         {"Healthy": 0.57, "ChronicGoodHealth": 0.12, "ChronicBadHealth": 0.31}, #EmiliaR
     "Medication":     {"NotOnMed": 0.55, "OnMed": 0.45}, #EmiliaR
     # implied marginals (derived from binary/ternary tables)
-    "citizenship":    {"Italian": 0.89, "Foreigner": 0.11}, #Northeast
+    "citizenship":    {"Italian": 0.85, "Foreigner": 0.15}, #BO
     "education":      {"SecondaryAndLess": 0.52, "UpperSecondary": 0.34, "Tertiary": 0.14}, #Northeast
     "ResidenceQ":     {"CommuteInward": 0.27, "Reno": 0.11, "Navile": 0.13, "Saragozza": 0.13, "SanDonato": 0.15, "SantoStefano": 0.10, "Savena": 0.11}, #BO 2023 extraAssumpCommuter
     "employment":     {"FullTime": 0.38, "PartTime": 0.08, "Unemployed": 0.02, "NotInLF": 0.52}, #EmiliaR
@@ -152,10 +152,10 @@ age_marital = {
     "75+":   {"NeverMarried": 0.07, "Married": 0.49, "Divorced": 0.05, "Widowed": 0.39},
 }
 
-# B4: P(Sex | Citizenship) #PBO
+# B4: P(Sex | Citizenship) #BO
 citizenship_sex = {
     "Italian":   {"F": 0.52, "M": 0.48},
-    "Foreigner": {"F": 0.53, "M": 0.47},
+    "Foreigner": {"F": 0.52, "M": 0.48},
 
 }
 
@@ -209,9 +209,9 @@ studentStat_sex = {
     "UniStudent":   {"F": 0.57, "M": 0.43},
 }
 
-# B11: P(Age | StudentStat) #BO
+# B11: P(Age | StudentStat) #EmiliaR
 studentStat_age = {
-    "UniStudent":    {"0-4": 0.00, "5-14": 0.00, "15-24": 0.61, "25-34": 0.29, "35-49": 0.10, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
+    "UniStudent":    {"0-4": 0.00, "5-14": 0.00, "15-24": 0.61, "25-34": 0.34, "35-49": 0.05, "50-64": 0.00, "65-74": 0.00, "75+": 0.00},
 }
 
  
@@ -624,7 +624,7 @@ education_sex_citizenship = {
 
 }
 
-# T3: P(Sex | StudentStat, age) #BO
+# T3: P(Sex | StudentStat, age) #IT
 sex_age_studentStat = {
     "UniStudent": {
         "15-24":     {"F": 0.58, "M": 0.42},
@@ -918,6 +918,7 @@ h_age_marital = {
     "5-14":   {"NeverMarried": 1.00, "Married": 0.00, "Divorced": 0.00, "Widowed": 0.00},
 }
 
+
 #H2 #BO
 h_age_education = {
     "0-4":    {"SecondaryAndLess": 1.00, "UpperSecondary": 0.00, "Tertiary": 0.00},
@@ -1068,7 +1069,15 @@ h_employment__TranspTimeWorker = {
 h_age_BMI = {
     "0-4":    {"UnderAge": 1.00, "UnderWeight": 0.00, "NormalWeight": 0.00, "OverWeight": 0.00, "Obese": 0.00},
     "5-14":   {"UnderAge": 1.00, "UnderWeight": 0.00, "NormalWeight": 0.00, "OverWeight": 0.00, "Obese": 0.00},
+    "15-24":  {"UnderAge": 0.00, "UnderWeight": 0.20, "NormalWeight": 0.20, "OverWeight": 0.20, "Obese": 0.40},
+    "25-34":  {"UnderAge": 0.00, "UnderWeight": 0.20, "NormalWeight": 0.20, "OverWeight": 0.20, "Obese": 0.40},
+    "35-49":  {"UnderAge": 0.00, "UnderWeight": 0.20, "NormalWeight": 0.20, "OverWeight": 0.20, "Obese": 0.40},
+    "50-64":  {"UnderAge": 0.00, "UnderWeight": 0.20, "NormalWeight": 0.20, "OverWeight": 0.20, "Obese": 0.40},
+    "65-74":  {"UnderAge": 0.00, "UnderWeight": 0.20, "NormalWeight": 0.20, "OverWeight": 0.20, "Obese": 0.40},
+    "75+":    {"UnderAge": 0.00, "UnderWeight": 0.20, "NormalWeight": 0.20, "OverWeight": 0.20, "Obese": 0.40},
 }
+
+
 
 #H22 #BO
 h_age_alcoholCons = {
@@ -1131,7 +1140,15 @@ h_WeekDSportOutD_age = {
 h_age_LifeSatisfaction = {
     "0-4":  {"Under14yo": 1.00, "0-3": 0.00, "4-6": 0.00, "7-10": 0.00},
     "5-14": {"Under14yo": 1.00, "0-3": 0.00, "4-6": 0.00, "7-10": 0.00},
+    "15-24":{"Under14yo": 0.00, "0-3": 0.30, "4-6": 0.30, "7-10": 0.40},
+    "25-34":{"Under14yo": 0.00, "0-3": 0.30, "4-6": 0.30, "7-10": 0.40},
+    "35-49":{"Under14yo": 0.00, "0-3": 0.30, "4-6": 0.30, "7-10": 0.40},
+    "50-64":{"Under14yo": 0.00, "0-3": 0.30, "4-6": 0.30, "7-10": 0.40},
+    "65-74":{"Under14yo": 0.00, "0-3": 0.30, "4-6": 0.30, "7-10": 0.40},
+    "75+":  {"Under14yo": 0.00, "0-3": 0.30, "4-6": 0.30, "7-10": 0.40},
+    
 }
+
 
 #H34 #BO
 h_age_employment = {
@@ -1152,14 +1169,12 @@ h_age_Wage = {
 }
 
 
-
-# H37: P(StudentStat | age)  #BO — only the fully-determined impossible rows
-h_age_StudentStat = {
-    "0-4":   {"NotStudent": 1.00, "SchoolStudent": 0.00, "UniStudent": 0.00},
-    "50-64": {"NotStudent": 1.00, "SchoolStudent": 0.00, "UniStudent": 0.00},
-    "65-74": {"NotStudent": 1.00, "SchoolStudent": 0.00, "UniStudent": 0.00},
-    "75+":   {"NotStudent": 1.00, "SchoolStudent": 0.00, "UniStudent": 0.00},
+# H37 STRUCTURAL TABLES, ROUND 2  --  education <-> student status
+h_StudentStat_education = {
+    "UniStudent":    {"SecondaryAndLess": 0.0},
+    "SchoolStudent": {"Tertiary": 0.0},
 }
+
 
 
 
@@ -1214,32 +1229,296 @@ h_MainTranspStudnt_MainTranspWorker = {
                     "CarPassanger": 0.00},
 }
 
-# H43 #BO : Commuter cannot be both not student and not worker
+
+
+# H43  #BO : a CommuteInward resident cannot have a work commute that is
+# internal to the municipality or outward-directed.
+h_ResidenceQ_EmployCommute = {
+    "CommuteInward": {"NotWorker": 0.55, "InsideBO": 0.00, "Outward": 0.00, "Inward": 0.45},
+}
+ 
+# H44  #BO : same for the study commute.
+h_ResidenceQ_StudentCommute = {
+    "CommuteInward": {"NotStudent": 0.75, "InsideBO": 0.00, "Outward": 0.00, "Inward": 0.25},
+}
+ 
+# H45  #BO : a CommuteInward resident who is neither a work commuter nor a
+# study commuter is impossible. Irreducibly ternary: a non-working student
+# commuter and a working non-student commuter are both legitimate, so no
+# pairwise rule can express this; only the triple is forbidden.
 h_ResidenceQ_EmployCommute_StudentCommute = {
     "CommuteInward": {
-        "NotWorker": {"NotStudent": 0.0, "Inward": 1.0},
-    },
-}
-
-#H44 #BO
-h_ResidenceQ_StudentCommute_EmployCommute = {
-    "CommuteInward": {
-        "NotStudent": {"NotWorker": 0.0, "Inward": 1.0},
-    },
-}
-
-#H45 #BO
-h_EmployCommute_StudentCommute_ResidenceQ = {
-    "NotWorker": {
-        "NotStudent": {"CommuteInward": 0.0, "Reno": 0.15, "Navile": 0.15, "Saragozza": 0.15, "SanDonato": 0.15, "SantoStefano": 0.20, "Savena": 0.20},
-    },
-}
-
-#H46 #BO
-h_StudentCommute_EmployCommute_ResidenceQ = {
-    "NotStudent": {
-        "NotWorker": {"CommuteInward": 0.0, "Reno": 0.15, "Navile": 0.15, "Saragozza": 0.15, "SanDonato": 0.15, "SantoStefano": 0.20, "Savena": 0.20},
+        "NotWorker": {"NotStudent": 0.00, "Inward": 1.00},
     },
 }
 
 
+# H46  #BO
+h_employstat_StudentStat_LunchPlace = {
+    "NotWorker": {"NotStudent": {"Home": 0.33, "Canteen": 0.00, "Restaurant":0.33, "Cafe": 0.34, "AtS/WPlace": 0.00}},
+}
+
+
+
+# H47 SundayOut <-> SaturdayOut: the Under3yo sentinel must agree  #BO
+h_SundayOut_SaturdayOut = {
+    "Under3yo": {"ExitHouse": 0.0, "StayIn": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H48 SundayOut <-> WeekDayOut: the Under3yo sentinel must agree  #BO
+h_SundayOut_WeekDayOut = {
+    "Under3yo": {"ExitHouse": 0.0, "StayIn": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H49 SundayOut <-> SunSocialEnterT: the Under3yo sentinel must agree  #BO
+h_SundayOut_SunSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H50 SundayOut <-> SatSocialEnterT: the Under3yo sentinel must agree  #BO
+h_SundayOut_SatSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H51 SundayOut <-> WeekDSocialEnterT: the Under3yo sentinel must agree  #BO
+h_SundayOut_WeekDSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H52 SundayOut <-> SunSportOutD: the Under3yo sentinel must agree  #BO
+h_SundayOut_SunSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H53 SundayOut <-> SatSportOutD: the Under3yo sentinel must agree  #BO
+h_SundayOut_SatSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H54 SundayOut <-> WeekDSportOutD: the Under3yo sentinel must agree  #BO
+h_SundayOut_WeekDSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H55 SaturdayOut <-> WeekDayOut: the Under3yo sentinel must agree  #BO
+h_SaturdayOut_WeekDayOut = {
+    "Under3yo": {"ExitHouse": 0.0, "StayIn": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H56 SaturdayOut <-> SunSocialEnterT: the Under3yo sentinel must agree  #BO
+h_SaturdayOut_SunSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H57 SaturdayOut <-> SatSocialEnterT: the Under3yo sentinel must agree  #BO
+h_SaturdayOut_SatSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H58 SaturdayOut <-> WeekDSocialEnterT: the Under3yo sentinel must agree  #BO
+h_SaturdayOut_WeekDSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H59 SaturdayOut <-> SunSportOutD: the Under3yo sentinel must agree  #BO
+h_SaturdayOut_SunSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H60 SaturdayOut <-> SatSportOutD: the Under3yo sentinel must agree  #BO
+h_SaturdayOut_SatSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H61 SaturdayOut <-> WeekDSportOutD: the Under3yo sentinel must agree  #BO
+h_SaturdayOut_WeekDSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H62 WeekDayOut <-> SunSocialEnterT: the Under3yo sentinel must agree  #BO
+h_WeekDayOut_SunSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H63 WeekDayOut <-> SatSocialEnterT: the Under3yo sentinel must agree  #BO
+h_WeekDayOut_SatSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H64 WeekDayOut <-> WeekDSocialEnterT: the Under3yo sentinel must agree  #BO
+h_WeekDayOut_WeekDSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H65 WeekDayOut <-> SunSportOutD: the Under3yo sentinel must agree  #BO
+h_WeekDayOut_SunSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H66 WeekDayOut <-> SatSportOutD: the Under3yo sentinel must agree  #BO
+h_WeekDayOut_SatSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H67 WeekDayOut <-> WeekDSportOutD: the Under3yo sentinel must agree  #BO
+h_WeekDayOut_WeekDSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "ExitHouse": {"Under3yo": 0.0},
+    "StayIn": {"Under3yo": 0.0},
+}
+
+#H68 SunSocialEnterT <-> SatSocialEnterT: the Under3yo sentinel must agree  #BO
+h_SunSocialEnterT_SatSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H69 SunSocialEnterT <-> WeekDSocialEnterT: the Under3yo sentinel must agree  #BO
+h_SunSocialEnterT_WeekDSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H70 SunSocialEnterT <-> SunSportOutD: the Under3yo sentinel must agree  #BO
+h_SunSocialEnterT_SunSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H71 SunSocialEnterT <-> SatSportOutD: the Under3yo sentinel must agree  #BO
+h_SunSocialEnterT_SatSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H72 SunSocialEnterT <-> WeekDSportOutD: the Under3yo sentinel must agree  #BO
+h_SunSocialEnterT_WeekDSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H73 SatSocialEnterT <-> WeekDSocialEnterT: the Under3yo sentinel must agree  #BO
+h_SatSocialEnterT_WeekDSocialEnterT = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H74 SatSocialEnterT <-> SunSportOutD: the Under3yo sentinel must agree  #BO
+h_SatSocialEnterT_SunSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H75 SatSocialEnterT <-> SatSportOutD: the Under3yo sentinel must agree  #BO
+h_SatSocialEnterT_SatSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H76 SatSocialEnterT <-> WeekDSportOutD: the Under3yo sentinel must agree  #BO
+h_SatSocialEnterT_WeekDSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H77 WeekDSocialEnterT <-> SunSportOutD: the Under3yo sentinel must agree  #BO
+h_WeekDSocialEnterT_SunSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H78 WeekDSocialEnterT <-> SatSportOutD: the Under3yo sentinel must agree  #BO
+h_WeekDSocialEnterT_SatSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H79 WeekDSocialEnterT <-> WeekDSportOutD: the Under3yo sentinel must agree  #BO
+h_WeekDSocialEnterT_WeekDSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H80 SunSportOutD <-> SatSportOutD: the Under3yo sentinel must agree  #BO
+h_SunSportOutD_SatSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H81 SunSportOutD <-> WeekDSportOutD: the Under3yo sentinel must agree  #BO
+h_SunSportOutD_WeekDSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H82 SatSportOutD <-> WeekDSportOutD: the Under3yo sentinel must agree  #BO
+h_SatSportOutD_WeekDSportOutD = {
+    "Under3yo": {"Y": 0.0, "N": 0.0, "Under3yo": 1.0},
+    "Y": {"Under3yo": 0.0},
+    "N": {"Under3yo": 0.0},
+}
+
+#H83 Age Studentstat #BO
+h_age_StudentStat = {
+    "0-4":   {"NotStudent": 1.0, "SchoolStudent": 0.0, "UniStudent": 0.0},
+    "5-14":  {"UniStudent": 0.0},
+    "25-34": {"SchoolStudent": 0.0},
+    "35-49": {"SchoolStudent": 0.0},
+    "50-64": {"NotStudent": 1.0, "SchoolStudent": 0.0, "UniStudent": 0.0},
+    "65-74": {"NotStudent": 1.0, "SchoolStudent": 0.0, "UniStudent": 0.0},
+    "75+":   {"NotStudent": 1.0, "SchoolStudent": 0.0, "UniStudent": 0.0},
+}
