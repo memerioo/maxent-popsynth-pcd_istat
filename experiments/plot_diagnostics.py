@@ -20,6 +20,7 @@ All figures are also saved as .png for easy inclusion in the thesis.
 import sys
 import os
 import pickle
+import glob
 import numpy as np
 
 # ── Path Setup ───────────────────────────────────────────────────────────────
@@ -60,9 +61,36 @@ GEO_COLORS = {
 #  Load saved data
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _fmt_n(n):
+    """Format the pool size for figure titles ('500K', '50K', or '?')."""
+    if n is None:
+        return "?"
+    n = int(n)
+    if n >= 1_000_000 and n % 1_000_000 == 0:
+        return f"{n // 1_000_000}M"
+    if n >= 1000 and n % 1000 == 0:
+        return f"{n // 1000}K"
+    return f"{n:,}"
+
+
 def load_run(exp_dir=EXP_DIR):
+    """
+    Load the saved history and its population.
+
+    The pool filename is DISCOVERED rather than hardcoded. The previous
+    version looked only for test_4_ISTAT_pop500000.npy, so a run at any
+    other pool size silently produced "pool not found", skipping Figures 3
+    and 5 and falling back to the last-iteration alpha_hat for the
+    stratified table (which is why its numbers differed slightly from the
+    run's own best-snapshot figures). Worse, when a stale 500k pool from an
+    older run WAS present, it was loaded next to a fresh history and the two
+    described different experiments.
+
+    Preference order:
+      1. the pool whose N matches run['N_pool']  (the correct one)
+      2. the most recently modified test_4_ISTAT_pop*.npy, with a warning
+    """
     hist_path = os.path.join(exp_dir, 'test_4_ISTAT_history.pkl')
-    pop_path  = os.path.join(exp_dir, 'test_4_ISTAT_pop500000.npy')
 
     if not os.path.exists(hist_path):
         raise FileNotFoundError(
@@ -72,7 +100,31 @@ def load_run(exp_dir=EXP_DIR):
     with open(hist_path, 'rb') as f:
         run = pickle.load(f)
 
-    pool = np.load(pop_path) if os.path.exists(pop_path) else None
+    pool, pop_path = None, None
+    n_pool = run.get('N_pool')
+    if n_pool is not None:
+        exact = os.path.join(exp_dir, f'test_4_ISTAT_pop{n_pool}.npy')
+        if os.path.exists(exact):
+            pop_path = exact
+
+    if pop_path is None:
+        cands = sorted(glob.glob(os.path.join(exp_dir, 'test_4_ISTAT_pop*.npy')),
+                       key=os.path.getmtime, reverse=True)
+        if cands:
+            pop_path = cands[0]
+            if n_pool is not None:
+                print(f"  [!] No pool file for N={n_pool:,} (the size recorded in the")
+                print(f"      history). Falling back to {os.path.basename(pop_path)},")
+                print(f"      which may come from a DIFFERENT run.")
+
+    if pop_path is not None:
+        pool = np.load(pop_path)
+        run['_pop_path'] = pop_path
+        if n_pool is not None and len(pool) != n_pool:
+            print(f"  [!] WARNING: pool has {len(pool):,} rows but the history says")
+            print(f"      N_pool={n_pool:,}. These are different runs; pool-based")
+            print(f"      figures and history-based figures will NOT agree.")
+
     return run, pool
 
 
@@ -96,78 +148,118 @@ def plot_convergence(run, fig_dir=FIG_DIR):
         tgt = run.get('final_weighted_mre' if key == 'weighted_mre' else 'final_mre')
         best_t = next((h['t'] for h in hist if h[key] == tgt), hist[-1]['t'])
 
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(16, 4.5))
+    # 2x2 layout: relative error on top (linear + log), absolute error on the
+    # bottom (linear + log).  The log-MAE panel is the informative one when the
+    # iterate is oscillating: a limit cycle shows as a band of constant width
+    # on the log axis, whereas genuine convergence narrows it.
+    fig, axes = plt.subplots(2, 2, figsize=(13.5, 9))
+    ax1, ax2 = axes[0]
+    ax3, ax4 = axes[1]
 
     # lr-decay events (if the run recorded per-iteration lr)
+    # lr-decay markers.
+    #
+    # These are only meaningful for a REACTIVE (plateau) schedule, where lr is
+    # piecewise constant and drops a handful of times. Under a CONTINUOUS
+    # schedule (cosine / exp) lr changes at EVERY iteration, so marking every
+    # change would draw one vertical line per iteration and wash the whole
+    # panel out. Detect that case and draw no markers instead; the schedule is
+    # already described in the figure title.
     lr_hist   = [h.get('lr') for h in hist]
     lr_events = []
     if lr_hist[0] is not None:
-        lr_events = [iters[i] for i in range(1, len(lr_hist))
-                     if lr_hist[i] != lr_hist[i - 1]]
+        raw = [iters[i] for i in range(1, len(lr_hist))
+               if lr_hist[i] != lr_hist[i - 1]]
+        # a plateau schedule has few, large, discrete drops
+        if len(raw) <= 20:
+            lr_events = raw
 
     # NOTE: no smoothing anywhere — every history entry (one per outer
     # iteration) is plotted as its own dot, connected by straight segments.
     _line = dict(lw=1.0, marker='.', markersize=2.5)
 
-    # ── Left: linear-scale MRE and wMRE ─────────────────────────────────────
+    def _decorate(ax, show_best_label=False):
+        ax.axvline(best_t, color='grey', lw=0.8, ls=':', alpha=0.7,
+                   label=f'Best snapshot (iter {best_t})' if show_best_label else None)
+        for i, ev in enumerate(lr_events):
+            ax.axvline(ev, color='#8a4fbf', lw=0.7, ls='--', alpha=0.5,
+                       label='lr decay' if (i == 0 and show_best_label) else None)
+
+    # ── Top-left: linear-scale MRE and wMRE ─────────────────────────────────
     ax1.plot(iters, mre,  color='#d45f00',
              label='MRE (unweighted, all constraints)', **_line)
     ax1.plot(iters, wmre, color='#1a6faf',
              label='wMRE (reliability-weighted)', **_line)
     ax1.axhline(run['final_mre'],          color='#d45f00', lw=0.8, ls='--', alpha=0.6)
     ax1.axhline(run['final_weighted_mre'], color='#1a6faf', lw=0.8, ls='--', alpha=0.6)
-    ax1.axvline(best_t, color='grey', lw=0.8, ls=':', alpha=0.7,
-                label=f'Best snapshot (iter {best_t})')
-    for i, ev in enumerate(lr_events):
-        ax1.axvline(ev, color='#8a4fbf', lw=0.7, ls='--', alpha=0.5,
-                    label='lr decay' if i == 0 else None)
+    _decorate(ax1, show_best_label=True)
     ax1.set_xlabel('Outer iteration')
     ax1.set_ylabel('Mean Relative Error')
-    ax1.set_title('Convergence (linear scale)')
+    ax1.set_title('Relative error (linear scale)')
     ax1.legend(fontsize=8, framealpha=0.9)
     ax1.set_ylim(bottom=0)
 
-    # ── Centre: log-scale MRE (Degli Esposti 2026 style) ────────────────────
-    ax2.semilogy(iters, mre,  color='#d45f00',
-                 label='MRE (unweighted)', **_line)
+    # ── Top-right: log-scale MRE ────────────────────────────────────────────
+    ax2.semilogy(iters, mre,  color='#d45f00', label='MRE (unweighted)', **_line)
     ax2.semilogy(iters, wmre, color='#1a6faf',
                  label='wMRE (reliability-weighted)', **_line)
     ax2.axhline(run['final_mre'],          color='#d45f00', lw=0.8, ls='--', alpha=0.6)
     ax2.axhline(run['final_weighted_mre'], color='#1a6faf', lw=0.8, ls='--', alpha=0.6)
-    ax2.axvline(best_t, color='grey', lw=0.8, ls=':', alpha=0.7)
-    # Add BO MRE reference line (what we achieve on the target population)
+    _decorate(ax2)
     bo_mre = run.get('bo_mre', None)
     if bo_mre:
         ax2.axhline(bo_mre, color='#1a6faf', lw=1.0, ls='-.', alpha=0.5,
                     label=f'BO MRE = {bo_mre:.4f}')
     ax2.set_xlabel('Outer iteration')
     ax2.set_ylabel('Mean Relative Error  (log scale)')
-    ax2.set_title('Convergence (log scale)')
+    ax2.set_title('Relative error (log scale)')
     ax2.yaxis.set_major_formatter(
-        matplotlib.ticker.FuncFormatter(lambda y, _: f'{y:.2f}' if y >= 0.01 else f'{y:.3f}'))
+        matplotlib.ticker.FuncFormatter(
+            lambda y, _: f'{y:.2f}' if y >= 0.01 else f'{y:.3f}'))
     ax2.legend(fontsize=8, framealpha=0.9)
     ax2.grid(True, which='both', alpha=0.25)
 
-    # ── Right: MAE ───────────────────────────────────────────────────────────
+    # ── Bottom-left: linear-scale MAE ───────────────────────────────────────
     ax3.plot(iters, mae, color='#2aa44e', label='MAE (all constraints)', **_line)
     ax3.axhline(run['final_mae'], color='#2aa44e', lw=0.8, ls='--', alpha=0.6,
                 label=f"Best MAE = {run['final_mae']:.5f}")
+    _decorate(ax3)
     ax3.set_xlabel('Outer iteration')
     ax3.set_ylabel('Mean Absolute Error')
-    ax3.set_title('Convergence — MAE')
+    ax3.set_title('Absolute error (linear scale)')
     ax3.legend(fontsize=8, framealpha=0.9)
     ax3.set_ylim(bottom=0)
 
+    # ── Bottom-right: log-scale MAE ─────────────────────────────────────────
+    ax4.semilogy(iters, mae, color='#2aa44e', label='MAE (all constraints)', **_line)
+    ax4.axhline(run['final_mae'], color='#2aa44e', lw=0.8, ls='--', alpha=0.6,
+                label=f"Best MAE = {run['final_mae']:.5f}")
+    _decorate(ax4)
+    ax4.set_xlabel('Outer iteration')
+    ax4.set_ylabel('Mean Absolute Error  (log scale)')
+    ax4.set_title('Absolute error (log scale)')
+    ax4.yaxis.set_major_formatter(
+        matplotlib.ticker.FuncFormatter(
+            lambda y, _: f'{y:.3f}' if y >= 0.001 else f'{y:.4f}'))
+    ax4.legend(fontsize=8, framealpha=0.9)
+    ax4.grid(True, which='both', alpha=0.25)
+
+    sched = run.get('lr_schedule', 'plateau')
+    if sched == 'plateau':
+        sched_txt = f"lr {run.get('lr', '?')} plateau"
+    else:
+        sched_txt = f"lr {run.get('lr', '?')}\u2192{run.get('lr_min', '?')} {sched}"
     fig.suptitle(
         f"GibbsPCDSolver — Bologna ISTAT  "
-        f"(N=500K, {run['n_iters']} iters, {run['fit_time']/3600:.1f}h)",
-        fontsize=12, y=1.02)
+        f"(N={_fmt_n(run.get('N_pool'))}, {run['n_iters']} iters, "
+        f"{run['fit_time']/3600:.1f}h, {sched_txt})",
+        fontsize=13, y=0.995)
     fig.tight_layout()
 
     for ext in ('pdf', 'png'):
         fig.savefig(os.path.join(fig_dir, f'convergence.{ext}'), bbox_inches='tight')
     plt.close(fig)
-    print(f"  [✓] convergence.pdf / .png  (3 panels: linear / log / MAE)")
+    print(f"  [✓] convergence.pdf / .png  (2x2: MRE linear/log, MAE linear/log)")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -742,6 +834,203 @@ def plot_alpha_scatter(pool, fig_dir=FIG_DIR):
 #  Main
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ─────────────────────────────────────────────────────────────────────────────
+#  Figure 4 (replacement): LP MRE floor
+# ─────────────────────────────────────────────────────────────────────────────
+#
+#  Replaces the old pairwise source-conflict dot plot. The pairwise floor only
+#  saw quantities that two sources state DIRECTLY, so it was blind to
+#  multi-way conflicts (a marginal contradicting a conditional times another
+#  marginal) and to infeasibility created by the structural zeros. It was also
+#  a heuristic rather than a bound.
+#
+#  The LP floor minimises the weighted error over the LOCAL POLYTOPE: all
+#  families of per-scope marginals that are non-negative, normalised,
+#  consistent on overlaps, and zero on structurally forbidden patterns. Every
+#  genuine joint distribution projects into that set, so the LP optimum is a
+#  rigorous LOWER BOUND on the error any solver could achieve.
+#
+#  Left panel : observed error vs the bound, per geographic source. The gap is
+#               the part that is NOT forced by the data.
+#  Right panel: the individual constraints with the largest unavoidable
+#               relative error, with the target and the best value any
+#               distribution can give it.
+
+def plot_lp_floor(run, pool, fig_dir=FIG_DIR, top=12):
+    try:
+        from istat.mre_floor_lp import compute_lp_mre_floor
+        from istat.preprocess_istat import build_constraint_weights
+        from istat.preprocess_istat import build_constraint_set as _bcs
+        from istat.geo_tagging import parse_source_tags as _pst
+        from istat.attr_meta_ISTAT import (marginals as _marg,
+                                           ATTR_NAMES_SYNTH as _AN,
+                                           ATTR_META as _AM)
+    except ImportError as e:
+        print(f"  [!] LP floor figure skipped: {e}")
+        return None
+
+    ts, ms = _pst(os.path.join(ROOT_DIR, 'src', 'istat', 'attr_meta_ISTAT.py'))
+    cs, sources = _bcs(_marg, ts, ms)
+    W = build_constraint_weights(sources)
+    res = compute_lp_mre_floor(cs, weights=W, tighten='pairwise', verbose=False)
+    if not res.get('success'):
+        print(f"  [!] LP floor figure skipped: {res.get('status')}")
+        return None
+
+    per     = res['per_constraint']
+    alphas  = cs.alphas_array
+    valid   = alphas > 1e-3
+    src_arr = np.array(sources)
+
+    # observed per-constraint relative error from the delivered pool
+    obs_per = None
+    if pool is not None:
+        alpha_hat = _estimate_alpha_hat(pool, run)
+        if alpha_hat is not None:
+            obs_per = np.where(valid,
+                               np.abs(alpha_hat - alphas) / np.where(valid, alphas, 1.0),
+                               np.nan)
+
+    order = [t for t in ('BO', 'PBO', 'EmiliaR', 'NorthEast', 'Italy')
+             if t in set(sources)]
+    floor_by = [float(np.mean(per[(src_arr == t) & valid])) for t in order]
+    obs_by   = ([float(np.nanmean(obs_per[(src_arr == t) & valid])) for t in order]
+                if obs_per is not None else None)
+
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(15, 5.5),
+                                   gridspec_kw={'width_ratios': [1, 1.35]})
+
+    x = np.arange(len(order))
+    if obs_by is not None:
+        axL.bar(x - 0.2, obs_by, 0.4, color='#d45f00', label='Observed MRE')
+    axL.bar(x + 0.2, floor_by, 0.4, color='#3c7ab5',
+            label='LP floor (unavoidable)')
+    if obs_by is not None:
+        for xi, (o, f) in enumerate(zip(obs_by, floor_by)):
+            if o > 0:
+                axL.annotate(f'{100*f/o:.0f}%\nforced',
+                             xy=(xi, max(o, f)), xytext=(0, 6),
+                             textcoords='offset points', ha='center', fontsize=8)
+    axL.set_xticks(x); axL.set_xticklabels(order)
+    axL.set_ylabel('Mean Relative Error')
+    axL.set_title('Observed error vs. rigorous lower bound\n'
+                  'by geographic source', fontsize=11)
+    axL.legend(fontsize=9)
+    axL.grid(axis='y', alpha=0.25)
+
+    idx = np.argsort(per)[::-1][:top]
+    idx = [j for j in idx if per[j] > 1e-9][::-1]
+    labels, tg, bs = [], [], []
+    for j in idx:
+        attrs = [_AN[a] for a in cs.attrs_list[j]]
+        vals  = [_AM[attrs[i]]['vals'][v] for i, v in enumerate(cs.vals_list[j])]
+        lab = ", ".join(f"{a}={v}" for a, v in zip(attrs, vals))
+        labels.append(f"[{sources[j]}] {lab[:46]}")
+        tg.append(alphas[j]); bs.append(res['mu_hat'][j])
+
+    y = np.arange(len(idx))
+    for yi, (t, b) in enumerate(zip(tg, bs)):
+        axR.plot([t, b], [yi, yi], color='#bbbbbb', lw=1.4, zorder=1)
+    axR.scatter(tg, y, s=52, color='#d45f00', zorder=3,
+                label='Published target', marker='o')
+    axR.scatter(bs, y, s=52, color='#3c7ab5', zorder=3,
+                label='Best achievable (LP)', marker='D')
+    axR.set_yticks(y); axR.set_yticklabels(labels, fontsize=7.5)
+    axR.set_xlabel('Probability')
+    axR.set_title('Constraints with the largest unavoidable error\n'
+                  '(gap = irreducible, no distribution can close it)', fontsize=11)
+    axR.legend(fontsize=9, loc='lower right')
+    axR.grid(axis='x', alpha=0.25)
+
+    fig.suptitle(
+        f"LP MRE floor — local-polytope lower bound   "
+        f"(floor={res['floor_unweighted']:.4f} unweighted, "
+        f"{res['floor_weighted']:.4f} weighted; "
+        f"{res['n_floored']} of {res['n_valid']} constraints floored)",
+        fontsize=12, y=1.0)
+    fig.tight_layout()
+    for ext in ('pdf', 'png'):
+        fig.savefig(os.path.join(fig_dir, f'mre_floor_lp.{ext}'), bbox_inches='tight')
+    plt.close(fig)
+    print("  [✓] mre_floor_lp.pdf / .png")
+    return res
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Figure 6: pie chart — share of the global MRE by geographic source
+# ─────────────────────────────────────────────────────────────────────────────
+#
+#  Uses the additive contribution of Equation (19):
+#      C_g = n_g * MRE_g / n_total ,   sum_g C_g = MRE_global
+#  so the wedges are literal shares of the headline number, not a rescaling.
+#  The companion wedge set shows how many CONSTRAINTS each source holds, which
+#  makes the point that Italy dominates the error partly because it is the
+#  largest group and partly because it fits worst.
+
+def plot_source_pie(run, pool, fig_dir=FIG_DIR):
+    if pool is None:
+        print("  [!] source pie skipped (no pool)")
+        return
+    from istat.preprocess_istat import build_constraint_set as _bcs
+    from istat.geo_tagging import parse_source_tags as _pst
+    from istat.attr_meta_ISTAT import (marginals as _marg,
+                                       ATTR_NAMES_SYNTH as _AN,
+                                       ATTR_META as _AM)
+    ts, ms = _pst(os.path.join(ROOT_DIR, 'src', 'istat', 'attr_meta_ISTAT.py'))
+    cs, sources = _bcs(_marg, ts, ms)
+    alphas = cs.alphas_array
+    valid  = alphas > 1e-3
+    alpha_hat = _estimate_alpha_hat(pool, run)
+    if alpha_hat is None:
+        print("  [!] source pie skipped (cannot estimate alpha_hat)")
+        return
+    rel = np.where(valid, np.abs(alpha_hat - alphas) / np.where(valid, alphas, 1.0),
+                   np.nan)
+    src_arr = np.array(sources)
+    n_valid = int(valid.sum())
+    global_mre = float(np.nanmean(rel[valid]))
+
+    order = [t for t in ('BO', 'PBO', 'EmiliaR', 'NorthEast', 'Italy')
+             if t in set(sources)]
+    colors = {'BO': '#2c6fbb', 'PBO': '#63a2d8', 'EmiliaR': '#f0c419',
+              'NorthEast': '#e8843c', 'Italy': '#c0392b'}
+    contrib, counts = [], []
+    for t in order:
+        m = (src_arr == t) & valid
+        contrib.append(float(np.nanmean(rel[m])) * m.sum() / n_valid)
+        counts.append(int(m.sum()))
+
+    fig, (axA, axB) = plt.subplots(1, 2, figsize=(13, 6))
+    W_of = {'BO': 1.00, 'PBO': 0.85, 'EmiliaR': 0.50,
+            'NorthEast': 0.30, 'Italy': 0.15}
+
+    wedges, _, _ = axA.pie(
+        contrib, labels=[f"{t}\nW={W_of.get(t, float('nan')):.2f}" for t in order],
+        autopct=lambda p: f'{p:.1f}%', startangle=90, counterclock=False,
+        colors=[colors.get(t, '#999999') for t in order],
+        textprops={'fontsize': 9},
+        wedgeprops={'edgecolor': 'white', 'linewidth': 1.5})
+    axA.set_title(f'Share of the global MRE by source\n'
+                  f'(additive contributions, total MRE = {global_mre:.4f})',
+                  fontsize=11)
+
+    axB.pie(counts, labels=[f"{t}\nn={c}" for t, c in zip(order, counts)],
+            autopct=lambda p: f'{p:.1f}%', startangle=90, counterclock=False,
+            colors=[colors.get(t, '#999999') for t in order],
+            textprops={'fontsize': 9},
+            wedgeprops={'edgecolor': 'white', 'linewidth': 1.5})
+    axB.set_title('Share of the constraint set by source\n'
+                  '(for comparison: error share vs. group size)', fontsize=11)
+
+    fig.suptitle('Where the error lives — geographic decomposition',
+                 fontsize=13, y=1.0)
+    fig.tight_layout()
+    for ext in ('pdf', 'png'):
+        fig.savefig(os.path.join(fig_dir, f'source_pie.{ext}'), bbox_inches='tight')
+    plt.close(fig)
+    print("  [✓] source_pie.pdf / .png")
+
+
 def main():
     print("━" * 64)
     print("  ISTAT Diagnostics — loading saved run")
@@ -793,10 +1082,14 @@ def main():
     else:
         print("  Figure 3: skipped (pool .npy not found)")
 
-    print("  Figure 4: MRE floor / source conflicts")
-    plot_mre_floor()
+    print("  Figure 4: LP MRE floor (rigorous lower bound)")
+
+    plot_lp_floor(run, pool)
 
     if pool is not None:
+        print("  Figure 6: MRE share by source (pie)")
+        plot_source_pie(run, pool)
+
         print("  Figure 5: α̂ vs α scatter")
         plot_alpha_scatter(pool)
     else:
@@ -855,6 +1148,62 @@ def main():
         print(f"  [!] Floor scalar failed: {e}")
         import traceback; traceback.print_exc()
 
+    # ── LP MRE floor: rigorous lower bound over the local polytope ──────────
+    # Complements the pairwise floor above. The pairwise version only sees
+    # quantities that two sources state directly; this one also captures
+    # multi-way conflicts and infeasibility created by the structural zeros,
+    # and it is a genuine lower bound rather than a heuristic.
+    try:
+        from istat.mre_floor_lp import (compute_lp_mre_floor,
+                                        print_lp_floor_summary)
+        from istat.preprocess_istat import build_constraint_weights
+        from istat.attr_meta_ISTAT import (ATTR_NAMES_SYNTH as _AN,
+                                           ATTR_META as _AM)
+        print("\n  LP MRE floor (local-polytope lower bound)")
+        _ts2, _ms2 = _pst(os.path.join(ROOT_DIR, 'src', 'istat',
+                                       'attr_meta_ISTAT.py'))
+        _cs2, _src2 = _bcs(_marg, _ts2, _ms2)
+        _W2 = build_constraint_weights(_src2)
+        _lp = compute_lp_mre_floor(_cs2, weights=_W2, tighten='pairwise',
+                                   verbose=True)
+        print()
+        print_lp_floor_summary(_lp, observed_mre, observed_wmre,
+                               sources=_src2, cs=_cs2,
+                               attr_names=_AN, attr_meta=_AM, top=12)
+    except Exception as e:
+        print(f"  [!] LP floor failed: {e}")
+        import traceback; traceback.print_exc()
+
+    # ── Manifest: what was actually written, and what is stale ──────────────
+    # Figures are written by several independent code paths, some of which are
+    # skipped when the pool is missing, and one figure (mre_floor) is no longer
+    # produced at all since the LP bound replaced it. Without a manifest a
+    # stale file from an earlier run is indistinguishable from a fresh one,
+    # and can end up in the thesis.
+    import time
+    expected = ['convergence', 'stratified_mre', 'diversity',
+                'mre_floor_lp', 'source_pie', 'alpha_scatter']
+    now = time.time()
+    print(f"\n{'━'*64}")
+    print(f"  FIGURE MANIFEST  ({FIG_DIR}/)")
+    print(f"{'━'*64}")
+    print(f"  {'file':<24}{'age':>12}   status")
+    print(f"  {'-'*54}")
+    for name in expected:
+        f = os.path.join(FIG_DIR, f'{name}.png')
+        if not os.path.exists(f):
+            print(f"  {name+'.png':<24}{'--':>12}   NOT WRITTEN  <-- check the log above")
+            continue
+        age = now - os.path.getmtime(f)
+        age_s = f"{age:.0f}s" if age < 90 else f"{age/60:.0f}m" if age < 5400 else f"{age/3600:.1f}h"
+        flag = "ok" if age < 300 else "STALE  <-- from an earlier run"
+        print(f"  {name+'.png':<24}{age_s:>12}   {flag}")
+    # anything present but no longer produced
+    if os.path.isdir(FIG_DIR):
+        extra = sorted(x[:-4] for x in os.listdir(FIG_DIR)
+                       if x.endswith('.png') and x[:-4] not in expected)
+        for name in extra:
+            print(f"  {name+'.png':<24}{'':>12}   ORPHAN — no longer generated, safe to delete")
     print(f"\n{'━'*64}")
     print(f"  Done. All figures saved to {FIG_DIR}/")
     print(f"{'━'*64}")
