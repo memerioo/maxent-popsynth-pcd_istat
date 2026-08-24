@@ -58,7 +58,7 @@ def legality_audit(pool):
     print(legality_report(cs, pool, ATTR_NAMES_SYNTH, ATTR_META, top=8))
 
 
-def read_profiles(num_to_print=10):
+def read_profiles(num_to_print=20):
     pop_path = find_pool()
     print(f"Loading population from:\n  {pop_path}\n")
     pop = np.load(pop_path)

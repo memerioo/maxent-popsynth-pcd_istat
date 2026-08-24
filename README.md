@@ -122,6 +122,7 @@ experiments/
   test_blocks_smoke.py       FAST sanity check — run this first
   plot_diagnostics.py        All thesis figures from the saved run
   see_results.py             Print sample synthetic individuals + legality audit
+  repair_legality.py         Repairs the few illegal individuals
 ```
 
 ---
@@ -139,6 +140,7 @@ export NUMBA_NUM_THREADS=8               # required for bit-reproducibility
 python experiments/test_4_ISTAT.py       # several hours at N=500K
 
 # 3. Figures and inspection
+python experiments/repair_legality.py    #repair the illegal individuals
 python experiments/plot_diagnostics.py   # → experiments/figures/
 python experiments/see_results.py 10     # inspect synthetic Bolognesi
 ```
